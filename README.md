@@ -2,14 +2,6 @@
 
 A universal plugin repository for **Jellyfin Media Server**. This project aggregates plugin feeds, de-duplicates entries, normalizes assets, and publishes a single catalogue URL that is easier for end users to install and maintain.
 
-<a href="https://www.star-history.com/?repos=0belous%2FJellyfin-Universal-Catalogue&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" style="max-height:300px;" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" style="max-height:300px;" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left" />
-   <img alt="Star History Chart" style="max-height:300px;" src="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left" />
- </picture>
-</a>
-
 ## Table of Contents
 - [Why this repo exists](#why-this-repo-exists)
 - [Manifest URL](#manifest-url)
@@ -72,3 +64,12 @@ If you want to add a missing plugin source:
 1. update `sources.txt`
 2. regenerate the manifests with `node update.js`
 3. open a pull request with the new source and any context maintainers should know
+
+## Star history
+<a href="https://www.star-history.com/?repos=0belous%2FJellyfin-Universal-Catalogue&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" style="max-height:300px;" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" style="max-height:300px;" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left" />
+   <img alt="Star History Chart" style="max-height:300px;" src="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left" />
+ </picture>
+</a>
