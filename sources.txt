@@ -13,7 +13,6 @@ https://github.com/cxfksword/jellyfin-plugin-danmu/releases/download/manifest/ma
 https://github.com/cxfksword/jellyfin-plugin-metashark/releases/download/manifest/manifest.json
 https://github.com/lachlandcp/jellyfin-editors-choice-plugin/raw/main/manifest.json
 https://intro-skipper.org/manifest.json
-https://jellyfin-repo.jesseward.com/manifest.json
 https://jellyfish-client.github.io/plugin/manifest.json
 https://kookxiang.github.io/jellyfin-plugin-bangumi/repository.json
 https://luckynos7evin.github.io/jellyfin-plugins/manifest.json

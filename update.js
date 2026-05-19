@@ -342,9 +342,6 @@ function sanitizePlugins(plugins) {
                 if (v.dependencies) {
                     v.dependencies = v.dependencies.filter(depId => depId.toLowerCase() !== guid);
                 }
-                if (!v.targetAbi || v.targetAbi.trim() === "") {
-                    v.targetAbi = "10.11.0.0"; 
-                }
             });
             plugin.versions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
@@ -425,7 +422,7 @@ async function processList(sourceFile, outputFile) {
         const safeAgent = 'universal';
         const timestamp = new Date().toISOString();
         const checksum = hashString('upr-' + safeAgent);
-        const targetAbi = '10.11.0.0';
+        const targetAbi = '10.8.0.0';
         const pluginCount = plugins.length;
         const dummy = {
             guid: crypto.randomUUID ? crypto.randomUUID() : hashString('upr-dummy-' + timestamp),

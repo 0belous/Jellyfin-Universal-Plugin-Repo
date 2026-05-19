@@ -26,9 +26,6 @@ function sanitizePlugins(plugins) {
                 if (version.dependencies) {
                     version.dependencies = version.dependencies.filter((depId) => depId.toLowerCase() !== resolvedGuid);
                 }
-                if (!version.targetAbi || version.targetAbi.trim() === '') {
-                    version.targetAbi = '10.11.0.0';
-                }
             });
             plugin.versions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
