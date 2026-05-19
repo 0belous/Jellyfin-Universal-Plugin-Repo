@@ -4,13 +4,33 @@ const crypto = require('crypto');
 const os = require('os');
 const { Worker } = require('worker_threads');
 
-let regenImages = ['true', '1', 'yes'].includes(String(process.argv[2]).toLowerCase());
-let agentArg = String(process.argv[3] || '').trim();
+const arg2 = String(process.argv[2] || '').trim();
+const arg3 = String(process.argv[3] || '').trim();
+
+const trueValues = ['true', '1', 'yes'];
+const falseValues = ['false', '0', 'no'];
+const arg2Lower = arg2.toLowerCase();
+
+let regenImages = false;
+let agentArg = '';
+
+if (trueValues.includes(arg2Lower)) {
+    regenImages = true;
+    agentArg = arg3;
+} else if (falseValues.includes(arg2Lower)) {
+    regenImages = false;
+    agentArg = arg3;
+} else {
+    agentArg = arg2 || arg3;
+}
 
 const pluginDir = path.join('./plugins', 'images');
 const imageBaseUrl = 'https://obelo.us/plugins/images/';
 const fallbackImageUrl = 'https://dl.obelous.dev/public/upr-missing.png';
-const defaultUserAgent = 'Jellyfin-Server/10.0.0.0';
+const sanitizedAgentVersion = (agentArg || '10.0.0.0').replace(/[^a-zA-Z0-9._-]/g, '');
+const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion)
+    ? sanitizedAgentVersion
+    : `Jellyfin-Server/${sanitizedAgentVersion}`;
 
 const WORKER_POOL_SIZE = 4;
 let workerPool = [];
@@ -209,7 +229,7 @@ async function getSources(sourceFile){
         return { plugins: [], sourceCount: 0 };
     }
 
-    let pluginMap = new Map();
+        let plugins = [];
     const fetchPromises = sources.map(url => fetchWithWorker(url));
     const results = await Promise.allSettled(fetchPromises);
     await waitForAllWorkersComplete();
@@ -220,31 +240,29 @@ async function getSources(sourceFile){
         
         if (result.status === 'fulfilled') {
             try {
-                const json = result.value.data;
+                let json = result.value.data;
                 console.log(`Fetched ${url}...`);
-                for (const plugin of json) {
+                const pluginList = Array.isArray(json) ? json : (json.plugins || []);
+
+                for (const plugin of pluginList) {
                     const guid = plugin.guid || plugin.Guid;
-                    if (!guid) continue;
-                    if (pluginMap.has(guid)) {
-                        console.log(`    -> Merging duplicate: ${plugin.name}`);
-                        const existing = pluginMap.get(guid);
-                        const combinedVersions = [...existing.versions, ...plugin.versions];
-                        existing.versions = Array.from(new Map(combinedVersions.map(v => [v.version, v])).values());
-                    } else {
-                        plugin._metaSourceUrl = url;
-                        pluginMap.set(guid, plugin);
+                    if (!guid) {
+                        continue;
                     }
+                    plugin._metaSourceUrl = url;
+                    plugins.push(plugin);
                 }
             } catch (error) {
                 console.error(`Error processing ${url}: ${error.message}`);
             }
+
         } else {
             console.error(`Error fetching ${url}: ${result.reason.message}`);
         }
     }
     
-    return {
-        plugins: Array.from(pluginMap.values()),
+        return {
+            plugins: plugins,
         sourceCount: sources.length
     };
 }
@@ -253,7 +271,7 @@ async function clearImagesFolder() {
     try {
         const entries = await fs.readdir(pluginDir, { withFileTypes: true });
         for (const entry of entries) {
-            if (entry.name === 'manifest.json') continue;
+            let plugins = [];
             await fs.rm(path.join(pluginDir, entry.name), { recursive: true, force: true });
         }
     } catch (err) {
@@ -269,16 +287,6 @@ async function downloadImage(url, filename) {
         const buffer = await res.arrayBuffer();
         await fs.writeFile(path.join(pluginDir, filename), Buffer.from(buffer));
         return true;
-    } catch (err) {
-        console.error(`Error downloading image ${url}:`, err.message);
-        return false;
-    }
-}
-
-async function imageExists(filename) {
-    try {
-        await fs.access(path.join(pluginDir, filename));
-        return true;
     } catch {
         return false;
     }
@@ -289,6 +297,14 @@ function getImageExtension(url) {
     return ext || '.png';
 }
 
+async function imageExists(filename) {
+    try {
+        await fs.access(path.join(pluginDir, filename));
+        return true;
+    } catch {
+        return false;
+    }
+}
 function getPluginId(plugin) {
     return plugin.id || plugin.Id || plugin.pluginId || plugin.name || null;
 }

@@ -47,7 +47,6 @@ https://raw.githubusercontent.com/Felitendo/jellyfin-plugin-lyrics/master/manife
 https://raw.githubusercontent.com/FizzyMUC/jellyfin-oscars-plugin/main/manifest.json
 https://raw.githubusercontent.com/Fovty/HoverTrailer/master/manifest.json
 https://raw.githubusercontent.com/G-grbz/Jellyfin-MonWUI-Plugin/main/manifest.json
-https://raw.githubusercontent.com/GeiserX/quality-gate/main/manifest.json
 https://raw.githubusercontent.com/GrandguyJS/media-upload-plugin/main/manifest.json
 https://raw.githubusercontent.com/HarshLabs/jellyfin-plugin-native-trickplay/main/manifest.json
 https://raw.githubusercontent.com/hexxone/TeleJelly/dist/manifest.json
