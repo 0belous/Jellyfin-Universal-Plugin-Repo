@@ -23,12 +23,11 @@ https://obelo.us/upr
 ```
 
 ## Installation
-1. Ensure that you are always running the latest version of jellyfin.
-2. Open the Jellyfin admin dashboard.
-3. Go to the plugin or catalogue repository settings.
-4. Remove outdated repository entries if you previously added multiple plugin feeds.
-5. Add the main catalogue URL shown above.
-6. Save the configuration and refresh your available plugins.
+1. Open the Jellyfin admin dashboard.
+2. Go to the plugin or catalogue repository settings.
+3. Remove outdated repository entries if you previously added multiple plugin feeds.
+4. Add the main catalogue URL shown above.
+5. Save the configuration and refresh your available plugins.
 
 ## How this project is maintained
 The update pipeline is driven by `update.js`.
