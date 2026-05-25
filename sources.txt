@@ -152,3 +152,6 @@ https://titlovi.github.io/titlovi-jellyfin/repository.json
 https://wetrakr.github.io/wetrakr-jf/manifest.json
 https://www.iamparadox.dev/jellyfin/plugins/manifest.json
 https://xzonn.top/JellyfinPluginDouban/manifest.json
+https://github.com/PunchPlay/jellyfin-plugin-punchplay/blob/main/manifest.json
+https://raw.githubusercontent.com/varunaditya-plus/BetterSeerrTabs/main/manifest.json
+https://raw.githubusercontent.com/TheIntroDB/jellyfin-plugin/main/manifest.json
