@@ -14,6 +14,7 @@ https://github.com/cxfksword/jellyfin-plugin-danmu/releases/download/manifest/ma
 https://github.com/cxfksword/jellyfin-plugin-metashark/releases/download/manifest/manifest.json
 https://github.com/cxfksword/jellyfin-plugin-tmdbplus/releases/download/manifest/manifest.json
 https://github.com/lachlandcp/jellyfin-editors-choice-plugin/raw/main/manifest.json
+https://github.com/PunchPlay/jellyfin-plugin-punchplay/blob/main/manifest.json
 https://intro-skipper.org/manifest.json
 https://jellyfish-client.github.io/plugin/manifest.json
 https://kookxiang.github.io/jellyfin-plugin-bangumi/repository.json
@@ -118,12 +119,16 @@ https://raw.githubusercontent.com/SiroxCW/Jellyfin-AniWorld-Downloader/main/mani
 https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest.json
 https://raw.githubusercontent.com/superuser404notfound/jellyfin-plugin-language-aware-images/main/manifest.json
 https://raw.githubusercontent.com/te9c/jellyfin-plugin-shikimori/main/manifest.json
+https://raw.githubusercontent.com/TheIntroDB/jellyfin-plugin/main/manifest.json
 https://raw.githubusercontent.com/thenchev/jellyfin-show-tracker-plugin/main/manifest.json
 https://raw.githubusercontent.com/TheXaman/jellyfin-plugin-languageTags/main/manifest.json
 https://raw.githubusercontent.com/thisispivi/JellyfinSleepGuard/main/manifest.json
 https://raw.githubusercontent.com/Thomas05000005/MaintenanceDeluxe-jellyfin-plugin/main/manifest.json
 https://raw.githubusercontent.com/Tracearr/Media-Server-SSE/main/manifest.json
 https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/manifest.json
+https://raw.githubusercontent.com/upchui/Jellyfin-DirectPlayForce/main/manifest.json
+https://raw.githubusercontent.com/upchui/Jellyfin-GhostLibrary/main/manifest.json
+https://raw.githubusercontent.com/varunaditya-plus/BetterSeerrTabs/main/manifest.json
 https://raw.githubusercontent.com/vicvinue/jellyfin-plugin-subtitlecat/main/manifest.json
 https://raw.githubusercontent.com/Viperinius/jellyfin-plugins/master/manifest.json
 https://raw.githubusercontent.com/virtualmarc/jellyfin-jfignore-plugin/master/manifest.json
@@ -148,6 +153,3 @@ https://titlovi.github.io/titlovi-jellyfin/repository.json
 https://wetrakr.github.io/wetrakr-jf/manifest.json
 https://www.iamparadox.dev/jellyfin/plugins/manifest.json
 https://xzonn.top/JellyfinPluginDouban/manifest.json
-https://raw.githubusercontent.com/varunaditya-plus/BetterSeerrTabs/main/manifest.json
-https://raw.githubusercontent.com/TheIntroDB/jellyfin-plugin/main/manifest.json
-https://raw.githubusercontent.com/upchui/Jellyfin-GhostLibrary/main/manifest.json
