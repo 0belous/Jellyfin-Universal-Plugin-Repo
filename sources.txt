@@ -155,3 +155,4 @@ https://github.com/PunchPlay/jellyfin-plugin-punchplay/blob/main/manifest.json
 https://raw.githubusercontent.com/varunaditya-plus/BetterSeerrTabs/main/manifest.json
 https://raw.githubusercontent.com/TheIntroDB/jellyfin-plugin/main/manifest.json
 https://raw.githubusercontent.com/upchui/Jellyfin-GhostLibrary/main/manifest.json
+https://raw.githubusercontent.com/upchui/Jellyfin-DirectPlayForce/main/manifest.json
