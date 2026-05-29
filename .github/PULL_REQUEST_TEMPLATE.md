@@ -1,5 +1,11 @@
-### Feature / Bug fixes:
+### Adding sources:
 
-1. [ ] Have you ran update.js and pushed the resulting manifest to your forks repo?
+Plugin Source:
 
-2. [ ] Have you tested the generated manifest on jellyfin?
+Plugin Repo URL:
+
+1. [ ] Have you sorted the sources.txt file alphabetically?
+
+2. [ ] Have you deleted duplicate lines in sources.txt?
+
+3. [ ] Have you checked if the plugin already exists in the Jellyfin Catalogue?

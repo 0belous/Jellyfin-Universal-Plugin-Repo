@@ -1,0 +1,16 @@
+[Unit]
+Description=Jellyfin Universal Catalogue Server
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/Jellyfin-Universal-Catalogue
+ExecStart=/home/ubuntu/.bun/bin/bun index.js
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target

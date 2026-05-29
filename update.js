@@ -28,6 +28,7 @@ const pluginDir = path.join('./plugins', 'images');
 const imageBaseUrl = 'https://obelo.us/plugins/images/';
 const fallbackImageUrl = 'https://dl.obelous.dev/public/upr-missing.png';
 const sanitizedAgentVersion = (agentArg || '10.0.0.0').replace(/[^a-zA-Z0-9._-]/g, '');
+const agentLabel = (agentArg || 'universal').replace(/[^a-zA-Z0-9._-]/g, '') || 'universal';
 const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion)
     ? sanitizedAgentVersion
     : `Jellyfin-Server/${sanitizedAgentVersion}`;
@@ -41,6 +42,21 @@ const MANIFEST_WORKER_POOL_SIZE = Math.max(2, Math.min(4, (os.cpus()?.length || 
 let manifestWorkerPool = [];
 let manifestWorkerQueue = [];
 let activeManifestWorkers = 0;
+
+function createLogger(label) {
+    const prefix = label ? `[${label}] ` : '';
+
+    return {
+        info(message) {
+            console.log(`${prefix}${message}`);
+        },
+        error(message) {
+            console.error(`${prefix}${message}`);
+        }
+    };
+}
+
+const logger = createLogger(agentLabel);
 
 function initializeWorkerPool() {
 	for (let i = 0; i < WORKER_POOL_SIZE; i++) {
@@ -225,11 +241,12 @@ async function getSources(sourceFile){
         const fileContent = await fs.readFile(sourceFile, 'utf8');
         sources = fileContent.split(/\r?\n/).filter(line => line.trim() !== '' && !line.trim().startsWith('#'));
     } catch (err) {
-        console.error(`Error reading ${sourceFile}:`, err.message);
+        logger.error(`error reading ${sourceFile}: ${err.message}`);
         return { plugins: [], sourceCount: 0 };
     }
 
-        let plugins = [];
+    let plugins = [];
+    let collectedPlugins = 0;
     const fetchPromises = sources.map(url => fetchWithWorker(url));
     const results = await Promise.allSettled(fetchPromises);
     await waitForAllWorkersComplete();
@@ -241,8 +258,8 @@ async function getSources(sourceFile){
         if (result.status === 'fulfilled') {
             try {
                 let json = result.value.data;
-                console.log(`Fetched ${url}...`);
                 const pluginList = Array.isArray(json) ? json : (json.plugins || []);
+                let added = 0;
 
                 for (const plugin of pluginList) {
                     const guid = plugin.guid || plugin.Guid;
@@ -251,13 +268,17 @@ async function getSources(sourceFile){
                     }
                     plugin._metaSourceUrl = url;
                     plugins.push(plugin);
+                    added++;
                 }
+
+                collectedPlugins += added;
+                logger.info(`http requests ${i + 1}/${sources.length} complete (${collectedPlugins} plugins)`);
             } catch (error) {
-                console.error(`Error processing ${url}: ${error.message}`);
+                logger.error(`error processing ${url}: ${error.message}`);
             }
 
         } else {
-            console.error(`Error fetching ${url}: ${result.reason.message}`);
+            logger.error(`error fetching ${url}: ${result.reason.message}`);
         }
     }
     
@@ -271,16 +292,14 @@ async function clearImagesFolder() {
     try {
         const entries = await fs.readdir(pluginDir, { withFileTypes: true });
         for (const entry of entries) {
-            let plugins = [];
             await fs.rm(path.join(pluginDir, entry.name), { recursive: true, force: true });
         }
     } catch (err) {
-        console.error('Error clearing images folder:', err);
+        logger.error(`error clearing images folder: ${err.message}`);
     }
 }
 
 async function downloadImage(url, filename) {
-    console.log(`Downloading image: ${url} as ${filename}`);
     try {
         const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
         if (!res.ok) throw new Error(`Failed to fetch image: ${res.status}`);
@@ -358,10 +377,17 @@ function sanitizePlugins(plugins) {
 }
 
 async function processImages(pluginData) {
+    logger.info(`processing images for ${pluginData.length} plugins`);
+
+    let downloaded = 0;
+    let reused = 0;
+    let fallbackCount = 0;
+    let renamed = 0;
+
     for (const plugin of pluginData) {
         if (!plugin.imageUrl) {
             plugin.imageUrl = fallbackImageUrl;
-            console.log(`    -> Using fallback imageUrl for plugin ${getPluginId(plugin) || 'unknown'}`);
+            fallbackCount++;
             continue;
         }
 
@@ -378,9 +404,9 @@ async function processImages(pluginData) {
             if (filename !== legacyFilename && !shouldDownload && await imageExists(legacyFilename)) {
                 try {
                     await fs.rename(path.join(pluginDir, legacyFilename), path.join(pluginDir, filename));
-                    console.log(`    -> Renamed image asset to remove spaces: ${legacyFilename} -> ${filename}`);
+                    renamed++;
                 } catch (err) {
-                    console.error(`Error renaming image ${legacyFilename}:`, err.message);
+                    logger.error(`error renaming image ${legacyFilename}: ${err.message}`);
                 }
             }
 
@@ -388,37 +414,40 @@ async function processImages(pluginData) {
                 const success = await downloadImage(plugin.imageUrl, filename);
                 if (!success) {
                     plugin.imageUrl = fallbackImageUrl;
-                    console.log(`    -> Using fallback imageUrl for plugin ${pluginId}`);
+                    fallbackCount++;
                     continue;
                 }
+                downloaded++;
             } else {
-                console.log(`Skipping existing image: ${filename}`);
+                reused++;
             }
             if (shouldDownload || await imageExists(filename)) {
                 plugin.imageUrl = imageBaseUrl + filename;
-                console.log(`    -> Updated manifest imageUrl for plugin ${pluginId}`);
             }
         }
     }
+
+    logger.info(`images complete: downloaded ${downloaded}, reused ${reused}, renamed ${renamed}, fallback ${fallbackCount}`);
 }
 
 async function writeManifest(manifestJson, outputFile, pluginCount){
     if (!manifestJson) {
-        console.log(`No data to write to manifest ${outputFile}. Aborting.`);
+        logger.info(`no data to write to manifest ${outputFile}. aborting.`);
         return;
     }
     try {
         await fs.writeFile(outputFile, manifestJson);
     } catch (err) {
-        console.error(`Error writing manifest file ${outputFile}:`, err);
+        logger.error(`error writing manifest file ${outputFile}: ${err.message}`);
     }
-    console.log(`\nSuccessfully created ${outputFile} with ${pluginCount} total plugins`);
+    logger.info(`manifest written: ${outputFile} (${pluginCount} total plugins)`);
 }
 
 async function processList(sourceFile, outputFile) {
     const { plugins: fetchedPlugins, sourceCount } = await getSources(sourceFile);
     let plugins = fetchedPlugins;
     try {
+        logger.info(`merging and normalizing ${plugins.length} collected plugins`);
         const safeAgent = 'universal';
         const timestamp = new Date().toISOString();
         const checksum = hashString('upr-' + safeAgent);
@@ -448,12 +477,14 @@ async function processList(sourceFile, outputFile) {
 
         plugins.unshift(dummy);
     } catch (err) {
-        console.error('Error creating dummy plugin:', err.message);
+        logger.error(`error creating dummy plugin: ${err.message}`);
     }
 
     if (plugins.length > 0) {
         plugins = await transformPluginsInWorkers(plugins);
+        logger.info(`merge complete: ${plugins.length} plugins ready for image processing`);
         await processImages(plugins);
+        logger.info('serializing manifest payload');
         const manifestJson = await stringifyManifestInWorker(plugins);
         await writeManifest(manifestJson, outputFile, plugins.length);
     }
