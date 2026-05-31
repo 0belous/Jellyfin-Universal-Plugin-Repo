@@ -152,3 +152,5 @@ https://titlovi.github.io/titlovi-jellyfin/repository.json
 https://wetrakr.github.io/wetrakr-jf/manifest.json
 https://www.iamparadox.dev/jellyfin/plugins/manifest.json
 https://xzonn.top/JellyfinPluginDouban/manifest.json
+https://raw.githubusercontent.com/josdion/subbuzz/master/repo/jellyfin_10.11.json
+https://tuimdb.com/jellyfin/manifest.json
