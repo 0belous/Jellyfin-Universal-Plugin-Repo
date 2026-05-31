@@ -94,6 +94,7 @@ https://raw.githubusercontent.com/lostb1t/jellyfin-plugin-collection-import/main
 https://raw.githubusercontent.com/luall0/jellyfin-luall0-plugins/refs/heads/main/manifest.json
 https://raw.githubusercontent.com/metatube-community/jellyfin-plugin-metatube/dist/manifest.json
 https://raw.githubusercontent.com/MFerretti27/StudioHubs/main/manifest.json
+https://github.com/RadicalMuffinMan/Jellyfin-Universal-Plugin-Repo/blob/main/sources.txt
 https://raw.githubusercontent.com/MorganKryze/jellyflare/main/manifest.json
 https://raw.githubusercontent.com/mpash/jellyfin-anime-filler-skipper/main/manifest.json
 https://raw.githubusercontent.com/n00bcodr/jellyfin-plugins/main/10.10/manifest.json 
@@ -105,7 +106,6 @@ https://raw.githubusercontent.com/pepebarrascout/jellyfin-plugin-radio-online/ma
 https://raw.githubusercontent.com/peterdu1109/NotifySync/refs/heads/main/repository.json
 https://raw.githubusercontent.com/PunchPlay/jellyfin-plugin-punchplay/refs/heads/main/manifest.json
 https://raw.githubusercontent.com/queukat/YummyKodik/gh-pages/manifest.json
-https://raw.githubusercontent.com/RadicalMuffinMan/moonfin-server/master/manifest.json
 https://raw.githubusercontent.com/rdpharr/jellyfin-plugin-localrecs/main/manifest.json
 https://raw.githubusercontent.com/retrorat1/Jellyfin.Plugin.TheSportsDB/main/manifest.json
 https://raw.githubusercontent.com/RomainPierre7/jellyfin-plugin-TelegramNotifier/main/manifest.json
