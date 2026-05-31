@@ -76,6 +76,7 @@ https://raw.githubusercontent.com/johnpc/jellyfin-plugin-smart-collections/refs/
 https://raw.githubusercontent.com/johnpc/jellyfin-plugin-top-ten/refs/heads/main/manifest.json
 https://raw.githubusercontent.com/jon4hz/jellyfin-plugin-discontinue-watching/main/manifest.json
 https://raw.githubusercontent.com/jon4hz/jellyfin-plugin-jellysleep/main/manifest.json
+https://raw.githubusercontent.com/jonjonsson/plugin.jellyfin.acdb.manifest/main/manifest.json
 https://raw.githubusercontent.com/JPVenson/Jellyfin.BetterDefaultProfilePictures.Plugin/refs/heads/master/manifest.json
 https://raw.githubusercontent.com/jwueller/jellyfin-repository/master/manifest.json
 https://raw.githubusercontent.com/jyourstone/jellyfin-plugin-manifest/main/manifest.json
