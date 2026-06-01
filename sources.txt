@@ -155,3 +155,6 @@ https://www.iamparadox.dev/jellyfin/plugins/manifest.json
 https://xzonn.top/JellyfinPluginDouban/manifest.json
 https://raw.githubusercontent.com/josdion/subbuzz/master/repo/jellyfin_10.11.json
 https://tuimdb.com/jellyfin/manifest.json
+https://raw.githubusercontent.com/pepebarrascout/jellyfin-plugin-lastfm/main/manifest.json
+https://raw.githubusercontent.com/pepebarrascout/jellyfin-plugin-listenbrainz/main/manifest.json
+https://raw.githubusercontent.com/pepebarrascout/jellyfin-plugin-podcast/main/manifest.json
