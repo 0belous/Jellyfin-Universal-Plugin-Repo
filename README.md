@@ -1,6 +1,6 @@
 # Jellyfin Universal Catalogue
 
-The universal plugin repository for **Jellyfin Media Server**. This project aggregates plugin feeds, de-duplicates entries, normalizes assets, and publishes a single catalogue URL that is easier for end users to install and maintain.
+The universal plugin repository for **Jellyfin Media Server**.
 
 ## Why this repo exists
 Managing multiple Jellyfin plugin repositories can get messy fast. This project provides:
