@@ -98,7 +98,6 @@ https://raw.githubusercontent.com/MFerretti27/StudioHubs/main/manifest.json
 https://raw.githubusercontent.com/Moonfin-Client/Plugin/refs/heads/master/manifest.json
 https://raw.githubusercontent.com/MorganKryze/jellyflare/main/manifest.json
 https://raw.githubusercontent.com/mpash/jellyfin-anime-filler-skipper/main/manifest.json
-https://raw.githubusercontent.com/n00bcodr/jellyfin-plugins/main/10.10/manifest.json 
 https://raw.githubusercontent.com/n00bcodr/jellyfin-plugins/main/10.11/manifest.json
 https://raw.githubusercontent.com/Namo2/InPlayerEpisodePreview/master/manifest.json
 https://raw.githubusercontent.com/NewsGuyTor/LogoSwap/main/manifest.json
