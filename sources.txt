@@ -1,5 +1,4 @@
 # 1      Please keep this file sorted alphabetically (ascending) and clear of duplicates
-# 11     supports comma separation for each exclusive match: 10.10,10.11,12.0
 # 2      In VS Code you can do this with:
 # 3      ctrl+shift+p > Delete Duplicate Lines
 # 4      ctrl+shift+p > Sort Lines Ascending
@@ -8,6 +7,7 @@
 # 7      manifest | source | version
 # 8                          ^
 # 9      version will usually be *.* to match any
+# 91     supports comma separation for each exclusive match: 10.10,10.11,12.0
 https://app.lizardbyte.dev/jellyfin-plugin-repo/manifest.json | https://github.com/LizardByte/jellyfin-plugin-repo | *.*
 https://baeac.xyz/jellyfin/plugins/manifest.json | https://github.com/21513/Jellyfeatured | *.*
 https://baywolf-studios.github.io/jellyfin-plugin-repo/manifest.json | https://github.com/baywolf-studios/jellyfin-plugin-repo | *.*
@@ -36,6 +36,7 @@ https://raw.githubusercontent.com/AbhayVAshokan/jellyfin-syncplay-chat/master/ma
 https://raw.githubusercontent.com/AECX/FinTube/master/manifest.json | https://github.com/AECX/FinTube | 10.8
 https://raw.githubusercontent.com/ankenyr/jellyfin-plugin-repo/master/manifest.json | https://github.com/ankenyr/jellyfin-youtube-metadata-plugin | *.*
 https://raw.githubusercontent.com/apteryxxyz/jellyfin-plugin-airtimes/main/manifest.json | https://github.com/apteryxxyz/jellyfin-plugin-airtimes | *.*
+https://raw.githubusercontent.com/apteryxxyz/jellyfin-plugin-airtimes/main/manifest.json | https://github.com/apteryxxyz/jellyfin-plugin-airtimes | 10.9
 https://raw.githubusercontent.com/arnesacnussem/jellyfin-plugin-meilisearch/refs/heads/master/manifest.json | https://github.com/arnesacnussem/jellyfin-plugin-meilisearch | *.*
 https://raw.githubusercontent.com/axolmain/jellyfin-otel-plugin/master/manifest.json | https://github.com/axolmain/jellyfin-otel-plugin | *.*
 https://raw.githubusercontent.com/BlackDark/jellyfin-plugin-empty-folder-cleaner/refs/heads/manifests/manifest.json | https://github.com/BlackDark/jellyfin-plugin-empty-folder-cleaner | *.*
@@ -74,6 +75,7 @@ https://raw.githubusercontent.com/iCosiSenpai/iCosiSenpai-Plugins/main/manifest.
 https://raw.githubusercontent.com/ifoundthetao/jellyfin-plugin-season-picker/main/manifest.json | https://github.com/ifoundthetao/jellyfin-plugin-season-picker | *.*
 https://raw.githubusercontent.com/iHumberto/jellyfin-plugin-scriptrunner/main/manifest.json | https://github.com/iHumberto/jellyfin-plugin-scriptrunner | *.*
 https://raw.githubusercontent.com/ImLunaHey/jellyfin-plugin-brrr-now/main/manifest.json | https://github.com/ImLunaHey/jellyfin-plugin-brrr-now | *.*
+https://raw.githubusercontent.com/ImLunaHey/jellyfin-plugin-brrr-now/main/manifest.json | https://github.com/ImLunaHey/jellyfin-plugin-brrr-now | 10.10
 https://raw.githubusercontent.com/JellyboxAD/Jellyfin.Plugin.StreamLimit/main/manifest.json | https://github.com/JellyboxAD/Jellyfin.Plugin.StreamLimit | *.*
 https://raw.githubusercontent.com/jellystrm/plugins/main/manifest.json | https://github.com/jellystrm/plugins | *.*
 https://raw.githubusercontent.com/john-pierre/jellyfin-plugin-tvheadend-api/refs/heads/main/manifest.json | https://github.com/john-pierre/jellyfin-plugin-tvheadend-api | *.*
@@ -161,5 +163,3 @@ https://tuimdb.com/jellyfin/manifest.json | https://github.com/b-sullender/Jelly
 https://wetrakr.github.io/wetrakr-jf/manifest.json | https://github.com/wetrakr/wetrakr-jf | *.*
 https://www.iamparadox.dev/jellyfin/plugins/manifest.json | https://github.com/IAmParadox27/jellyfin-plugin-repo | *.*
 https://xzonn.top/JellyfinPluginDouban/manifest.json | https://github.com/Xzonn/JellyfinPluginDouban | *.*
-https://raw.githubusercontent.com/ImLunaHey/jellyfin-plugin-brrr-now/main/manifest.json | https://github.com/ImLunaHey/jellyfin-plugin-brrr-now | 10.10
-https://raw.githubusercontent.com/apteryxxyz/jellyfin-plugin-airtimes/main/manifest.json | https://github.com/apteryxxyz/jellyfin-plugin-airtimes | 10.9
