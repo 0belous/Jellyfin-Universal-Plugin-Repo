@@ -303,6 +303,7 @@ async function getSources(sourceFile){
                     }
 
                     plugin._metaSourceUrl = sourceMeta.manifestUrl;
+                    plugin._metaGithubUrl = sourceMeta.githubUrl; 
                     plugins.push(plugin);
                     added++;
                 }
@@ -402,10 +403,16 @@ function sanitizePlugins(plugins) {
         }
         const descProp = ['description', 'Description', 'overview'].find(p => plugin[p]);
         if (descProp) {
-            plugin[descProp] = plugin[descProp]
+            let cleanedDesc = plugin[descProp]
                 .replace(/@\[renovate\[bot\]\].*$/gs, "")
                 .replace(/\n\s*\n/g, '\n')
                 .trim();
+            if (plugin._metaSourceUrl !== 'internal') {
+                const sourceLine = plugin._metaGithubUrl ? `\nSource: ${plugin._metaGithubUrl}` : '';
+                const manifestLine = plugin._metaSourceUrl ? `\nManifest: ${plugin._metaSourceUrl}` : '';
+                
+                cleanedDesc += `\n\n---\n${sourceLine}${manifestLine}`.replace(/\n\n+/g, '\n\n');
+            }
         }
         const { guid: g, name, ...rest } = plugin;
         return { guid: g, name, ...rest };
@@ -489,7 +496,7 @@ async function processList(sourceFile, outputFile) {
         const dummy = {
             guid: crypto.randomUUID ? crypto.randomUUID() : hashString('upr-dummy-' + timestamp),
             name: '! Universal Plugin Repo',
-            description: `You are using Universal Plugin Repo. Plugins Aggregated: ${pluginCount}, Number of sources: ${sourceCount}. `,
+            description: `You are using Universal Plugin Repo.\n Plugins Aggregated: ${pluginCount},\n Number of sources: ${sourceCount}. `,
             overview: `Jellyfin Plugin Aggregator\nGenerated: ${timestamp}`,
             owner: 'Obelous',
             category: 'Miscellaneous',
