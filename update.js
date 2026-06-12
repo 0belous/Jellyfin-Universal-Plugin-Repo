@@ -34,6 +34,11 @@ const agentLabel = (agentArg || 'universal').replace(/[^a-zA-Z0-9._-]/g, '') || 
 const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion)
     ? sanitizedAgentVersion
     : `Jellyfin-Server/${sanitizedAgentVersion}`;
+const sanitizedAgentVersion = (agentArg || '10.0.0.0').replace(/[^a-zA-Z0-9._-]/g, '');
+const agentLabel = (agentArg || 'universal').replace(/[^a-zA-Z0-9._-]/g, '') || 'universal';
+const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion)
+    ? sanitizedAgentVersion
+    : `Jellyfin-Server/${sanitizedAgentVersion}`;
 
 const WORKER_POOL_SIZE = 4;
 let workerPool = [];
@@ -250,6 +255,7 @@ async function getSources(sourceFile){
         rawLines = fileContent.split(/\r?\n/).filter(line => line.trim() !== '' && !line.trim().startsWith('#'));
     } catch (err) {
         logger.error(`error reading ${sourceFile}: ${err.message}`);
+        logger.error(`error reading ${sourceFile}: ${err.message}`);
         return { plugins: [], sourceCount: 0 };
     }
 
@@ -277,6 +283,11 @@ async function getSources(sourceFile){
         
         if (result.status === 'fulfilled') {
             try {
+                let json = result.value.data;
+                const pluginList = Array.isArray(json) ? json : (json.plugins || []);
+                let added = 0;
+
+                for (const plugin of pluginList) {
                 let json = result.value.data;
                 const pluginList = Array.isArray(json) ? json : (json.plugins || []);
                 let added = 0;
@@ -313,6 +324,7 @@ async function getSources(sourceFile){
                 logger.error(`error processing ${sourceMeta.manifestUrl}: ${error.message}`);
             }
 
+
         } else {
             logger.error(`error fetching ${filteredSources[i].manifestUrl}: ${result.reason.message}`);
         }
@@ -331,6 +343,7 @@ async function clearImagesFolder() {
             await fs.rm(path.join(pluginDir, entry.name), { recursive: true, force: true });
         }
     } catch (err) {
+        logger.error(`error clearing images folder: ${err.message}`);
         logger.error(`error clearing images folder: ${err.message}`);
     }
 }
@@ -352,6 +365,14 @@ function getImageExtension(url) {
     return ext || '.png';
 }
 
+async function imageExists(filename) {
+    try {
+        await fs.access(path.join(pluginDir, filename));
+        return true;
+    } catch {
+        return false;
+    }
+}
 async function imageExists(filename) {
     try {
         await fs.access(path.join(pluginDir, filename));
@@ -420,9 +441,17 @@ async function processImages(pluginData) {
     let fallbackCount = 0;
     let renamed = 0;
 
+    logger.info(`processing images for ${pluginData.length} plugins`);
+
+    let downloaded = 0;
+    let reused = 0;
+    let fallbackCount = 0;
+    let renamed = 0;
+
     for (const plugin of pluginData) {
         if (!plugin.imageUrl) {
             plugin.imageUrl = fallbackImageUrl;
+            fallbackCount++;
             fallbackCount++;
             continue;
         }
@@ -441,7 +470,9 @@ async function processImages(pluginData) {
                 try {
                     await fs.rename(path.join(pluginDir, legacyFilename), path.join(pluginDir, filename));
                     renamed++;
+                    renamed++;
                 } catch (err) {
+                    logger.error(`error renaming image ${legacyFilename}: ${err.message}`);
                     logger.error(`error renaming image ${legacyFilename}: ${err.message}`);
                 }
             }
@@ -451,10 +482,13 @@ async function processImages(pluginData) {
                 if (!success) {
                     plugin.imageUrl = fallbackImageUrl;
                     fallbackCount++;
+                    fallbackCount++;
                     continue;
                 }
                 downloaded++;
+                downloaded++;
             } else {
+                reused++;
                 reused++;
             }
             if (shouldDownload || await imageExists(filename)) {
@@ -468,13 +502,16 @@ async function processImages(pluginData) {
 async function writeManifest(manifestJson, outputFile, pluginCount){
     if (!manifestJson) {
         logger.info(`no data to write to manifest ${outputFile}. aborting.`);
+        logger.info(`no data to write to manifest ${outputFile}. aborting.`);
         return;
     }
     try {
         await fs.writeFile(outputFile, manifestJson);
     } catch (err) {
         logger.error(`error writing manifest file ${outputFile}: ${err.message}`);
+        logger.error(`error writing manifest file ${outputFile}: ${err.message}`);
     }
+    logger.info(`manifest written: ${outputFile} (${pluginCount} total plugins)`);
     logger.info(`manifest written: ${outputFile} (${pluginCount} total plugins)`);
 }
 
@@ -511,12 +548,14 @@ async function processList(sourceFile, outputFile) {
         plugins.unshift(dummy);
     } catch (err) {
         logger.error(`error creating dummy plugin: ${err.message}`);
+        logger.error(`error creating dummy plugin: ${err.message}`);
     }
 
     if (plugins.length > 0) {
         plugins = await transformPluginsInWorkers(plugins);
         logger.info(`merge complete: ${plugins.length}`);
         await processImages(plugins);
+        logger.info('serializing manifest payload');
         const manifestJson = await stringifyManifestInWorker(plugins);
         await writeManifest(manifestJson, outputFile, plugins.length);
     }

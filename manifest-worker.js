@@ -17,32 +17,28 @@ function findGithubUrl(obj) {
 }
 
 function sanitizePlugins(plugins) {
-	return plugins.map((plugin) => {
-		const guid = (plugin.guid || plugin.Guid || '').toLowerCase();
+    return plugins.map((plugin) => {
+        const resolvedGuid = (plugin.guid || plugin.Guid || '').toLowerCase();
+        const { guid, Guid, name, ...rest } = plugin;
 
-		if (plugin.versions) {
-			plugin.versions.forEach((version) => {
-				if (version.dependencies) {
-					version.dependencies = version.dependencies.filter((depId) => depId.toLowerCase() !== guid);
-				}
-				if (!version.targetAbi || version.targetAbi.trim() === '') {
-					version.targetAbi = '10.11.0.0';
-				}
-			});
-			plugin.versions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-		}
+        if (plugin.versions) {
+            plugin.versions.forEach((version) => {
+                if (version.dependencies) {
+                    version.dependencies = version.dependencies.filter((depId) => depId.toLowerCase() !== resolvedGuid);
+                }
+            });
+            plugin.versions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
 
-		const descProp = ['description', 'Description', 'overview'].find((prop) => plugin[prop]);
-		if (descProp) {
-			plugin[descProp] = plugin[descProp]
-				.replace(/@\[renovate\[bot\]\].*$/gs, '')
-				.replace(/\n\s*\n/g, '\n')
-				.trim();
-		}
-
-		const { guid: g, name, ...rest } = plugin;
-		return { guid: g, name, ...rest };
-	});
+        const descProp = ['description', 'Description', 'overview'].find((prop) => plugin[prop]);
+        if (descProp) {
+            plugin[descProp] = plugin[descProp]
+                .replace(/@\[renovate\[bot\]\].*$/gs, '')
+                .replace(/\n\s*\n/g, '\n')
+                .trim();
+        }
+        return { guid: resolvedGuid, name, ...rest };
+    });
 }
 
 function processDescriptions(pluginData, genTime) {

@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs/promises');
 const path = require('path');
 const { spawn } = require('child_process');
+const readline = require('readline');
 
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 3000);
@@ -17,9 +18,54 @@ const KNOWN_AGENTS_FILE = path.join(PLUGINS_DIR, '.known_user_agents.json');
 
 const updateInProgress = new Set();
 const knownAgents = new Map();
+const isInteractiveTerminal = Boolean(process.stdout.isTTY && !process.env.CI);
+const agentStatuses = new Map();
+let currentStatusLine = '';
+let completedAgentCount = 0;
 
 function nowIso() {
 	return new Date().toISOString();
+}
+
+function renderStatusPanel() {
+	if (!isInteractiveTerminal) {
+		return;
+	}
+
+	const entries = Array.from(agentStatuses.entries())
+		.sort((left, right) => right[1].updatedAt - left[1].updatedAt)
+		.slice(0, 1);
+	const line = entries.length > 0 ? `[${entries[0][0]}] ${entries[0][1].message}` : '';
+
+	if (line === currentStatusLine) {
+		return;
+	}
+
+	currentStatusLine = line;
+	readline.cursorTo(process.stdout, 0);
+	readline.clearLine(process.stdout, 0);
+	if (line) {
+		process.stdout.write(line);
+	}
+}
+
+function setAgentStatus(agentId, message) {
+	const current = agentStatuses.get(agentId);
+	if (current && current.message === message) {
+		return;
+	}
+
+	agentStatuses.set(agentId, {
+		message,
+		updatedAt: Date.now()
+	});
+	renderStatusPanel();
+}
+
+function clearAgentStatus(agentId) {
+	if (agentStatuses.delete(agentId)) {
+		renderStatusPanel();
+	}
 }
 
 function isJellyfinUserAgent(ua) {
@@ -142,17 +188,112 @@ async function runUpdateForAgent(agentId, regenImages = false) {
 		stdio: ['ignore', 'pipe', 'pipe']
 	});
 
+	let stdoutBuffer = '';
+	let stderrBuffer = '';
+	let lastStatusMessage = '';
+
+	function parseStatusMessage(line) {
+		const trimmed = line.trim();
+		if (!trimmed) {
+			return null;
+		}
+
+		let match = trimmed.match(/^\[(?:[^\]]+)\]\s+collecting manifests from (\d+) sources$/i);
+		if (match) {
+			return `collecting manifests 0/${match[1]}`;
+		}
+
+		match = trimmed.match(/^\[(?:[^\]]+)\]\s+http requests (\d+)\/(\d+) complete \((\d+) plugins\)$/i);
+		if (match) {
+			return `requests ${match[1]}/${match[2]} (${match[3]} plugins)`;
+		}
+
+		match = trimmed.match(/^\[(?:[^\]]+)\]\s+merging and normalizing (\d+) collected plugins$/i);
+		if (match) {
+			return `merging ${match[1]} plugins`;
+		}
+
+		match = trimmed.match(/^\[(?:[^\]]+)\]\s+merge complete: (\d+) plugins ready for image processing$/i);
+		if (match) {
+			return `image prep ${match[1]} plugins`;
+		}
+
+		match = trimmed.match(/^\[(?:[^\]]+)\]\s+processing images for (\d+) plugins$/i);
+		if (match) {
+			return `processing images ${match[1]} plugins`;
+		}
+
+		match = trimmed.match(/^\[(?:[^\]]+)\]\s+images complete: downloaded (\d+), reused (\d+), renamed (\d+), fallback (\d+)$/i);
+		if (match) {
+			return `images complete d${match[1]} r${match[2]} n${match[3]} f${match[4]}`;
+		}
+
+		if (/^\[(?:[^\]]+)\]\s+serializing manifest payload$/i.test(trimmed)) {
+			return 'serializing manifest';
+		}
+
+		match = trimmed.match(/^\[(?:[^\]]+)\]\s+manifest written: (.+) \((\d+) total plugins\)$/i);
+		if (match) {
+			return `done ${match[2]} plugins`;
+		}
+
+		return null;
+	}
+
+	function updateStatusFromLine(line) {
+		const message = parseStatusMessage(line);
+		if (!message) {
+			return;
+		}
+
+		lastStatusMessage = message;
+		setAgentStatus(agentId, lastStatusMessage);
+	}
+
+	function flushBufferedLines(buffer, chunk, onLine) {
+		const nextBuffer = buffer + chunk.toString();
+		const lines = nextBuffer.split(/\r?\n/);
+		const remainder = lines.pop() || '';
+
+		for (const line of lines) {
+			if (line.length > 0) {
+				onLine(line);
+			}
+		}
+
+		return remainder;
+	}
+
 	proc.stdout.on('data', (chunk) => {
-		process.stdout.write(`[update:${agentId}] ${chunk}`);
+		stdoutBuffer = flushBufferedLines(stdoutBuffer, chunk, (line) => {
+			updateStatusFromLine(line);
+		});
 	});
 
 	proc.stderr.on('data', (chunk) => {
-		process.stderr.write(`[update:${agentId}] ${chunk}`);
+		stderrBuffer = flushBufferedLines(stderrBuffer, chunk, (line) => {
+			process.stderr.write(`${line}\n`);
+		});
 	});
 
 	proc.on('close', async (code) => {
+		if (stdoutBuffer.length > 0) {
+			stdoutBuffer = '';
+		}
+		if (stderrBuffer.length > 0) {
+			process.stderr.write(`${stderrBuffer}\n`);
+			stderrBuffer = '';
+		}
 		updateInProgress.delete(agentId);
-		console.log(`update.js finished for ${agentId} with code ${code}`);
+		if (code === 0) {
+			completedAgentCount += 1;
+			console.log(`[${agentId}]`);
+			setAgentStatus(agentId, lastStatusMessage || 'completed');
+		} else {
+			completedAgentCount += 1;
+			console.log(`[${agentId}] finished with code ${code}`);
+			setAgentStatus(agentId, `finished with code ${code}`);
+		}
 		if (code === 0) {
 			markSeen(agentId);
 			try {
