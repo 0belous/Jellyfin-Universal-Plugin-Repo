@@ -26,7 +26,6 @@ https://queukat.github.io/AniLibriaStrmPlugin/plugins/manifest.json
 https://raw.githubusercontent.com/9p4/jellyfin-plugin-sso/manifest-release/manifest.json
 https://raw.githubusercontent.com/AbhayVAshokan/jellyfin-syncplay-chat/master/manifest.json
 https://raw.githubusercontent.com/AECX/FinTube/master/manifest.json
-https://raw.githubusercontent.com/aerglonus/jellyfin-plugin-letterboxd/main/manifest.json
 https://raw.githubusercontent.com/ankenyr/jellyfin-plugin-repo/master/manifest.json
 https://raw.githubusercontent.com/apteryxxyz/jellyfin-plugin-airtimes/main/manifest.json
 https://raw.githubusercontent.com/arnesacnussem/jellyfin-plugin-meilisearch/refs/heads/master/manifest.json
@@ -62,7 +61,6 @@ https://raw.githubusercontent.com/G-grbz/Jellyfin-MonWUI-Plugin/main/manifest.js
 https://raw.githubusercontent.com/GrandguyJS/media-upload-plugin/main/manifest.json
 https://raw.githubusercontent.com/HarshLabs/jellyfin-plugin-native-trickplay/main/manifest.json
 https://raw.githubusercontent.com/hexxone/TeleJelly/dist/manifest.json
-https://raw.githubusercontent.com/hrqmonteiro/jellyfin-plugin-letterboxd-sync/master/manifest.json
 https://raw.githubusercontent.com/iankiller77/MyAnimeSync/main/manifest.json
 https://raw.githubusercontent.com/iCosiSenpai/iCosiSenpai-Plugins/main/manifest.json
 https://raw.githubusercontent.com/ifoundthetao/jellyfin-plugin-season-picker/main/manifest.json
@@ -157,3 +155,4 @@ https://tuimdb.com/jellyfin/manifest.json
 https://raw.githubusercontent.com/pepebarrascout/jellyfin-plugin-lastfm/main/manifest.json
 https://raw.githubusercontent.com/pepebarrascout/jellyfin-plugin-listenbrainz/main/manifest.json
 https://raw.githubusercontent.com/pepebarrascout/jellyfin-plugin-podcast/main/manifest.json
+https://raw.githubusercontent.com/builtbyproxy/jellyfin-plugin-letterboxd/main/manifest.json
