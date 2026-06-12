@@ -4,13 +4,36 @@ const crypto = require('crypto');
 const os = require('os');
 const { Worker } = require('worker_threads');
 
-let regenImages = ['true', '1', 'yes'].includes(String(process.argv[2]).toLowerCase());
-let agentArg = String(process.argv[3] || '').trim();
+const LATEST_RELEASE_ABI = '10.11';
+
+const arg2 = String(process.argv[2] || '').trim();
+const arg3 = String(process.argv[3] || '').trim();
+
+const trueValues = ['true', '1', 'yes'];
+const falseValues = ['false', '0', 'no'];
+const arg2Lower = arg2.toLowerCase();
+
+let regenImages = false;
+let agentArg = '';
+
+if (trueValues.includes(arg2Lower)) {
+    regenImages = true;
+    agentArg = arg3;
+} else if (falseValues.includes(arg2Lower)) {
+    regenImages = false;
+    agentArg = arg3;
+} else {
+    agentArg = arg2 || arg3;
+}
 
 const pluginDir = path.join('./plugins', 'images');
 const imageBaseUrl = 'https://obelo.us/plugins/images/';
 const fallbackImageUrl = 'https://dl.obelous.dev/public/upr-missing.png';
-const defaultUserAgent = 'Jellyfin-Server/10.0.0.0';
+const sanitizedAgentVersion = (agentArg || '10.0.0.0').replace(/[^a-zA-Z0-9._-]/g, '');
+const agentLabel = (agentArg || 'universal').replace(/[^a-zA-Z0-9._-]/g, '') || 'universal';
+const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion)
+    ? sanitizedAgentVersion
+    : `Jellyfin-Server/${sanitizedAgentVersion}`;
 
 const WORKER_POOL_SIZE = 4;
 let workerPool = [];
@@ -21,6 +44,27 @@ const MANIFEST_WORKER_POOL_SIZE = Math.max(2, Math.min(4, (os.cpus()?.length || 
 let manifestWorkerPool = [];
 let manifestWorkerQueue = [];
 let activeManifestWorkers = 0;
+
+function createLogger(label) {
+    const prefix = label ? `[${label}] ` : '';
+
+    return {
+        info(message) {
+            console.log(`${prefix}${message}`);
+        },
+        error(message) {
+            console.error(`${prefix}${message}`);
+        }
+    };
+}
+
+const logger = createLogger(agentLabel);
+
+function isVersionMatch(target, constraint) {
+    if (!constraint || constraint === '.' || constraint === '*.*') return true;
+    const allowed = constraint.split(',').map(v => v.trim());
+    return allowed.some(v => target.startsWith(v));
+}
 
 function initializeWorkerPool() {
 	for (let i = 0; i < WORKER_POOL_SIZE; i++) {
@@ -200,52 +244,83 @@ async function stringifyManifestInWorker(data) {
 }
 
 async function getSources(sourceFile){
-    let sources = [];
+    let rawLines = [];
     try {
         const fileContent = await fs.readFile(sourceFile, 'utf8');
-        sources = fileContent.split(/\r?\n/).filter(line => line.trim() !== '' && !line.trim().startsWith('#'));
+        rawLines = fileContent.split(/\r?\n/).filter(line => line.trim() !== '' && !line.trim().startsWith('#'));
     } catch (err) {
-        console.error(`Error reading ${sourceFile}:`, err.message);
+        logger.error(`error reading ${sourceFile}: ${err.message}`);
         return { plugins: [], sourceCount: 0 };
     }
 
-    let pluginMap = new Map();
-    const fetchPromises = sources.map(url => fetchWithWorker(url));
+    const filteredSources = [];
+    for (const line of rawLines) {
+        const parts = line.split('|').map(s => s.trim());
+        const manifestUrl = parts[0];
+        const githubUrl = parts[1] || '';
+        const targetConstraint = parts[2] || '.';
+
+        if (isVersionMatch(sanitizedAgentVersion, targetConstraint)) {
+            filteredSources.push({ manifestUrl, githubUrl, targetConstraint });
+        }
+    }
+
+    let plugins = [];
+    let collectedPlugins = 0;
+    const fetchPromises = filteredSources.map(s => fetchWithWorker(s.manifestUrl));
     const results = await Promise.allSettled(fetchPromises);
     await waitForAllWorkersComplete();
 
     for (let i = 0; i < results.length; i++) {
         const result = results[i];
-        const url = sources[i];
+        const sourceMeta = filteredSources[i];
         
         if (result.status === 'fulfilled') {
             try {
-                const json = result.value.data;
-                console.log(`Fetched ${url}...`);
-                for (const plugin of json) {
+                let json = result.value.data;
+                const pluginList = Array.isArray(json) ? json : (json.plugins || []);
+                let added = 0;
+
+                for (const plugin of pluginList) {
                     const guid = plugin.guid || plugin.Guid;
                     if (!guid) continue;
-                    if (pluginMap.has(guid)) {
-                        console.log(`    -> Merging duplicate: ${plugin.name}`);
-                        const existing = pluginMap.get(guid);
-                        const combinedVersions = [...existing.versions, ...plugin.versions];
-                        existing.versions = Array.from(new Map(combinedVersions.map(v => [v.version, v])).values());
-                    } else {
-                        plugin._metaSourceUrl = url;
-                        pluginMap.set(guid, plugin);
+
+                    const pluginVersions = plugin.versions || plugin.Versions || [];
+                    let hasLatestAbi = false;
+
+                    for (const v of pluginVersions) {
+                        const abi = v.targetAbi || v.TargetAbi || '';
+                        if (abi && !isVersionMatch(abi, sourceMeta.targetConstraint)) {
+                            logger.info(`[compat] "${sourceMeta.manifestUrl}" (config: ${sourceMeta.targetConstraint}) contains a plugin which targets ${abi} which is outside of the configured range`);
+                        }
+
+                        if (abi.startsWith(LATEST_RELEASE_ABI)) {
+                            hasLatestAbi = true;
+                        }
                     }
+                    if ((sourceMeta.targetConstraint === '.' || sourceMeta.targetConstraint === '*.*') && !hasLatestAbi) {
+                        logger.info(`[compat] "${sourceMeta.manifestUrl}" is configured with *.* and lacks a version targeting latest release (${LATEST_RELEASE_ABI})`);
+                    }
+
+                    plugin._metaSourceUrl = sourceMeta.manifestUrl;
+                    plugins.push(plugin);
+                    added++;
                 }
+
+                collectedPlugins += added;
+                logger.info(`${i + 1}/${filteredSources.length} complete (${collectedPlugins} plugins)`);
             } catch (error) {
-                console.error(`Error processing ${url}: ${error.message}`);
+                logger.error(`error processing ${sourceMeta.manifestUrl}: ${error.message}`);
             }
+
         } else {
-            console.error(`Error fetching ${url}: ${result.reason.message}`);
+            logger.error(`error fetching ${filteredSources[i].manifestUrl}: ${result.reason.message}`);
         }
     }
     
     return {
-        plugins: Array.from(pluginMap.values()),
-        sourceCount: sources.length
+        plugins: plugins,
+        sourceCount: filteredSources.length
     };
 }
 
@@ -253,31 +328,19 @@ async function clearImagesFolder() {
     try {
         const entries = await fs.readdir(pluginDir, { withFileTypes: true });
         for (const entry of entries) {
-            if (entry.name === 'manifest.json') continue;
             await fs.rm(path.join(pluginDir, entry.name), { recursive: true, force: true });
         }
     } catch (err) {
-        console.error('Error clearing images folder:', err);
+        logger.error(`error clearing images folder: ${err.message}`);
     }
 }
 
 async function downloadImage(url, filename) {
-    console.log(`Downloading image: ${url} as ${filename}`);
     try {
         const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
         if (!res.ok) throw new Error(`Failed to fetch image: ${res.status}`);
         const buffer = await res.arrayBuffer();
         await fs.writeFile(path.join(pluginDir, filename), Buffer.from(buffer));
-        return true;
-    } catch (err) {
-        console.error(`Error downloading image ${url}:`, err.message);
-        return false;
-    }
-}
-
-async function imageExists(filename) {
-    try {
-        await fs.access(path.join(pluginDir, filename));
         return true;
     } catch {
         return false;
@@ -289,6 +352,14 @@ function getImageExtension(url) {
     return ext || '.png';
 }
 
+async function imageExists(filename) {
+    try {
+        await fs.access(path.join(pluginDir, filename));
+        return true;
+    } catch {
+        return false;
+    }
+}
 function getPluginId(plugin) {
     return plugin.id || plugin.Id || plugin.pluginId || plugin.name || null;
 }
@@ -326,9 +397,6 @@ function sanitizePlugins(plugins) {
                 if (v.dependencies) {
                     v.dependencies = v.dependencies.filter(depId => depId.toLowerCase() !== guid);
                 }
-                if (!v.targetAbi || v.targetAbi.trim() === "") {
-                    v.targetAbi = "10.11.0.0"; 
-                }
             });
             plugin.versions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
@@ -345,10 +413,17 @@ function sanitizePlugins(plugins) {
 }
 
 async function processImages(pluginData) {
+    logger.info(`processing images for ${pluginData.length} plugins`);
+
+    let downloaded = 0;
+    let reused = 0;
+    let fallbackCount = 0;
+    let renamed = 0;
+
     for (const plugin of pluginData) {
         if (!plugin.imageUrl) {
             plugin.imageUrl = fallbackImageUrl;
-            console.log(`    -> Using fallback imageUrl for plugin ${getPluginId(plugin) || 'unknown'}`);
+            fallbackCount++;
             continue;
         }
 
@@ -365,9 +440,9 @@ async function processImages(pluginData) {
             if (filename !== legacyFilename && !shouldDownload && await imageExists(legacyFilename)) {
                 try {
                     await fs.rename(path.join(pluginDir, legacyFilename), path.join(pluginDir, filename));
-                    console.log(`    -> Renamed image asset to remove spaces: ${legacyFilename} -> ${filename}`);
+                    renamed++;
                 } catch (err) {
-                    console.error(`Error renaming image ${legacyFilename}:`, err.message);
+                    logger.error(`error renaming image ${legacyFilename}: ${err.message}`);
                 }
             }
 
@@ -375,41 +450,41 @@ async function processImages(pluginData) {
                 const success = await downloadImage(plugin.imageUrl, filename);
                 if (!success) {
                     plugin.imageUrl = fallbackImageUrl;
-                    console.log(`    -> Using fallback imageUrl for plugin ${pluginId}`);
+                    fallbackCount++;
                     continue;
                 }
+                downloaded++;
             } else {
-                console.log(`Skipping existing image: ${filename}`);
+                reused++;
             }
             if (shouldDownload || await imageExists(filename)) {
                 plugin.imageUrl = imageBaseUrl + filename;
-                console.log(`    -> Updated manifest imageUrl for plugin ${pluginId}`);
             }
         }
     }
+    logger.info(`images complete: downloaded ${downloaded}, reused ${reused}, renamed ${renamed}, fallback ${fallbackCount}`);
 }
 
 async function writeManifest(manifestJson, outputFile, pluginCount){
     if (!manifestJson) {
-        console.log(`No data to write to manifest ${outputFile}. Aborting.`);
+        logger.info(`no data to write to manifest ${outputFile}. aborting.`);
         return;
     }
     try {
         await fs.writeFile(outputFile, manifestJson);
     } catch (err) {
-        console.error(`Error writing manifest file ${outputFile}:`, err);
+        logger.error(`error writing manifest file ${outputFile}: ${err.message}`);
     }
-    console.log(`\nSuccessfully created ${outputFile} with ${pluginCount} total plugins`);
+    logger.info(`manifest written: ${outputFile} (${pluginCount} total plugins)`);
 }
 
 async function processList(sourceFile, outputFile) {
     const { plugins: fetchedPlugins, sourceCount } = await getSources(sourceFile);
     let plugins = fetchedPlugins;
     try {
-        const safeAgent = 'universal';
         const timestamp = new Date().toISOString();
-        const checksum = hashString('upr-' + safeAgent);
-        const targetAbi = '10.11.0.0';
+        const checksum = hashString('upr-' + agentLabel);
+        const targetAbi = sanitizedAgentVersion;
         const pluginCount = plugins.length;
         const dummy = {
             guid: crypto.randomUUID ? crypto.randomUUID() : hashString('upr-dummy-' + timestamp),
@@ -435,11 +510,12 @@ async function processList(sourceFile, outputFile) {
 
         plugins.unshift(dummy);
     } catch (err) {
-        console.error('Error creating dummy plugin:', err.message);
+        logger.error(`error creating dummy plugin: ${err.message}`);
     }
 
     if (plugins.length > 0) {
         plugins = await transformPluginsInWorkers(plugins);
+        logger.info(`merge complete: ${plugins.length}`);
         await processImages(plugins);
         const manifestJson = await stringifyManifestInWorker(plugins);
         await writeManifest(manifestJson, outputFile, plugins.length);
