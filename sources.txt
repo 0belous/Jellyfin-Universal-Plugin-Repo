@@ -8,6 +8,7 @@
 # 8                          ^
 # 9      version will usually be *.* to match any
 # 91     supports comma separation for each exclusive match: 10.10,10.11,12.0
+https://ahouseofbards.github.io/Bonfire-JellyProfiles/manifest.json | https://github.com/AHouseOfBards/Bonfire-JellyProfiles | *.*
 https://app.lizardbyte.dev/jellyfin-plugin-repo/manifest.json | https://github.com/LizardByte/jellyfin-plugin-repo | *.*
 https://baeac.xyz/jellyfin/plugins/manifest.json | https://github.com/21513/Jellyfeatured | *.*
 https://baywolf-studios.github.io/jellyfin-plugin-repo/manifest.json | https://github.com/baywolf-studios/jellyfin-plugin-repo | *.*
