@@ -79,6 +79,7 @@ https://raw.githubusercontent.com/iHumberto/jellyfin-plugin-scriptrunner/main/ma
 https://raw.githubusercontent.com/ImLunaHey/jellyfin-plugin-brrr-now/main/manifest.json | https://github.com/ImLunaHey/jellyfin-plugin-brrr-now | *.*
 https://raw.githubusercontent.com/ImLunaHey/jellyfin-plugin-brrr-now/main/manifest.json | https://github.com/ImLunaHey/jellyfin-plugin-brrr-now | 10.10
 https://raw.githubusercontent.com/JellyboxAD/Jellyfin.Plugin.StreamLimit/main/manifest.json | https://github.com/JellyboxAD/Jellyfin.Plugin.StreamLimit | *.*
+https://raw.githubusercontent.com/Jellyfin-PG/Repository/refs/heads/main/manifest.json | https://github.com/Jellyfin-PG/JellyEmu | *.*
 https://raw.githubusercontent.com/jellystrm/plugins/main/manifest.json | https://github.com/jellystrm/plugins | *.*
 https://raw.githubusercontent.com/john-pierre/jellyfin-plugin-tvheadend-api/refs/heads/main/manifest.json | https://github.com/john-pierre/jellyfin-plugin-tvheadend-api | *.*
 https://raw.githubusercontent.com/johnpc/jellyfin-plugin-smart-collections/refs/heads/main/manifest.json | https://github.com/johnpc/jellyfin-plugin-smart-collections/ | *.*
