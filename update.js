@@ -31,6 +31,7 @@ const imageBaseUrl = 'https://obelo.us/plugins/images/';
 const fallbackImageUrl = 'https://dl.obelous.dev/public/upr-missing.png';
 const sanitizedAgentVersion = (agentArg || '10.0.0.0').replace(/[^a-zA-Z0-9._-]/g, '');
 const agentLabel = (agentArg || 'universal').replace(/[^a-zA-Z0-9._-]/g, '') || 'universal';
+const isTwelveRequest = sanitizedAgentVersion.startsWith('12.0');
 const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion)
     ? sanitizedAgentVersion
     : `Jellyfin-Server/${sanitizedAgentVersion}`;
@@ -64,6 +65,14 @@ function isVersionMatch(target, constraint) {
     if (!constraint || constraint === '.' || constraint === '*.*') return true;
     const allowed = constraint.split(',').map(v => v.trim());
     return allowed.some(v => target.startsWith(v));
+}
+
+function pluginSupportsRequestedAbi(plugin, requestedAbiPrefix) {
+    const pluginVersions = plugin.versions || plugin.Versions || [];
+    return pluginVersions.some((version) => {
+        const abi = version.targetAbi || version.TargetAbi || '';
+        return typeof abi === 'string' && abi.startsWith(requestedAbiPrefix);
+    });
 }
 
 function initializeWorkerPool() {
@@ -260,7 +269,7 @@ async function getSources(sourceFile){
         const githubUrl = parts[1] || '';
         const targetConstraint = parts[2] || '.';
 
-        if (isVersionMatch(sanitizedAgentVersion, targetConstraint)) {
+        if (isTwelveRequest || isVersionMatch(sanitizedAgentVersion, targetConstraint)) {
             filteredSources.push({ manifestUrl, githubUrl, targetConstraint });
         }
     }
@@ -285,21 +294,27 @@ async function getSources(sourceFile){
                     const guid = plugin.guid || plugin.Guid;
                     if (!guid) continue;
 
-                    const pluginVersions = plugin.versions || plugin.Versions || [];
-                    let hasLatestAbi = false;
-
-                    for (const v of pluginVersions) {
-                        const abi = v.targetAbi || v.TargetAbi || '';
-                        if (abi && !isVersionMatch(abi, sourceMeta.targetConstraint)) {
-                            logger.info(`[compat] "${sourceMeta.manifestUrl}" (config: ${sourceMeta.targetConstraint}) contains a plugin which targets ${abi} which is outside of the configured range`);
-                        }
-
-                        if (abi.startsWith(LATEST_RELEASE_ABI)) {
-                            hasLatestAbi = true;
-                        }
+                    if (isTwelveRequest && !pluginSupportsRequestedAbi(plugin, '12.0')) {
+                        continue;
                     }
-                    if ((sourceMeta.targetConstraint === '.' || sourceMeta.targetConstraint === '*.*') && !hasLatestAbi) {
-                        logger.info(`[compat] "${sourceMeta.manifestUrl}" is configured with *.* and lacks a version targeting latest release (${LATEST_RELEASE_ABI})`);
+
+                    if (!isTwelveRequest) {
+                        const pluginVersions = plugin.versions || plugin.Versions || [];
+                        let hasLatestAbi = false;
+
+                        for (const v of pluginVersions) {
+                            const abi = v.targetAbi || v.TargetAbi || '';
+                            if (abi && !isVersionMatch(abi, sourceMeta.targetConstraint)) {
+                                logger.info(`[compat] "${sourceMeta.manifestUrl}" (config: ${sourceMeta.targetConstraint}) contains a plugin which targets ${abi} which is outside of the configured range`);
+                            }
+
+                            if (abi.startsWith(LATEST_RELEASE_ABI)) {
+                                hasLatestAbi = true;
+                            }
+                        }
+                        if ((sourceMeta.targetConstraint === '.' || sourceMeta.targetConstraint === '*.*') && !hasLatestAbi) {
+                            logger.info(`[compat] "${sourceMeta.manifestUrl}" is configured with *.* and lacks a version targeting latest release (${LATEST_RELEASE_ABI})`);
+                        }
                     }
 
                     plugin._metaSourceUrl = sourceMeta.manifestUrl;
