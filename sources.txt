@@ -161,7 +161,6 @@ https://raw.githubusercontent.com/ztffn/Jellyfin-Roulette/main/manifest.json | h
 https://repo.jellyfin.org/files/plugin-unstable/manifest.json | https://github.com/jellyfin/jellyfin-meta-plugins | 12.0
 https://repo.jellyfin.org/files/plugin/manifest.json | https://github.com/jellyfin/jellyfin-meta-plugins | 10.*
 https://repo.xkrivo.net/jellyfin/manifest.json | https://github.com/lyarenei/jellyfin-plugin-applemusic | *.*
-https://simoni.dev/jellyfin/repo.json | https://github.com/MrChip53/jellyfin-plugin-m3ueditor | 10.7
 https://thelastfantasy.github.io/jellyfin-suite/manifest.json | https://github.com/thelastfantasy/jellyfin-suite | *.*
 https://titlovi.github.io/titlovi-jellyfin/repository.json | https://github.com/Titlovi/titlovi-jellyfin | *.*
 https://tuimdb.com/jellyfin/manifest.json | https://github.com/b-sullender/Jellyfin.Plugin.TUIMDB | *.*
