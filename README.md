@@ -58,8 +58,8 @@ If you want to add a missing plugin source:
 ## Star history
 <a href="https://www.star-history.com/?repos=0belous%2FJellyfin-Universal-Catalogue&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" style="max-height:300px;" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" style="max-height:300px;" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left" />
-   <img alt="Star History Chart" style="max-height:300px;" src="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&theme=dark&legend=top-left&sealed_token=TihnkVXJsM47qRbiulumvHT2vk21i75_fysAohZQHwQZOQB0Jc31huqgOQasKeBlc4jh3HT4tQgKHnFOVuf-5i92xQi1JcoPhrXbQsS7G9GHS9mGPjhPAT26Pm17bWAVq3YAl5YTMHeV2REbokWWSUXO57GDPsuJOezbHGiSwdhqY5txbiXd6FcHXxu-" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left&sealed_token=TihnkVXJsM47qRbiulumvHT2vk21i75_fysAohZQHwQZOQB0Jc31huqgOQasKeBlc4jh3HT4tQgKHnFOVuf-5i92xQi1JcoPhrXbQsS7G9GHS9mGPjhPAT26Pm17bWAVq3YAl5YTMHeV2REbokWWSUXO57GDPsuJOezbHGiSwdhqY5txbiXd6FcHXxu-" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left&sealed_token=TihnkVXJsM47qRbiulumvHT2vk21i75_fysAohZQHwQZOQB0Jc31huqgOQasKeBlc4jh3HT4tQgKHnFOVuf-5i92xQi1JcoPhrXbQsS7G9GHS9mGPjhPAT26Pm17bWAVq3YAl5YTMHeV2REbokWWSUXO57GDPsuJOezbHGiSwdhqY5txbiXd6FcHXxu-" />
  </picture>
 </a>
