@@ -223,9 +223,9 @@ async function runUpdateForAgent(agentId, regenImages = false) {
 			return `processing images ${match[1]} plugins`;
 		}
 
-		match = trimmed.match(/^\[(?:[^\]]+)\]\s+images complete: downloaded (\d+), reused (\d+), renamed (\d+), fallback (\d+)$/i);
+		match = trimmed.match(/^\[(?:[^\]]+)\]\s+images complete: downloaded (\d+), normalized (\d+), reused (\d+), renamed (\d+), badged (\d+), fallback (\d+)$/i);
 		if (match) {
-			return `images complete d${match[1]} r${match[2]} n${match[3]} f${match[4]}`;
+			return `images complete d${match[1]} z${match[2]} r${match[3]} n${match[4]} b${match[5]} f${match[6]}`;
 		}
 
 		if (/^\[(?:[^\]]+)\]\s+serializing manifest payload$/i.test(trimmed)) {
@@ -382,6 +382,11 @@ async function servePluginAsset(res, filename) {
 	await serveFile(res, absolute);
 }
 
+function isTwelveAgent(rawUserAgent) {
+	const normalized = normalizeUserAgent(rawUserAgent);
+	return Boolean(normalized && normalized.startsWith('12.0'));
+}
+
 async function handleManifestRequest(req, res, manifestName) {
 	const ua = req.headers['user-agent'] || '';
 	if (!isJellyfinUserAgent(ua)) {
@@ -436,6 +441,12 @@ async function start() {
 
 		const imageMatch = routePath.match(/^\/images\/(.+\.(png|jpg|jpeg|gif|webp|ico|svg))$/i);
 		if (imageMatch) {
+			if (imageMatch[1].startsWith('12/') && !isTwelveAgent(req.headers['user-agent'] || '')) {
+				res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+				res.end('Not found');
+				return;
+			}
+
 			servePluginAsset(res, imageMatch[1]).catch((error) => {
 				console.error('Failed to serve plugin asset:', error.message);
 				res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });

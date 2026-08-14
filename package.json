@@ -14,6 +14,9 @@
   "author": "",
   "type": "commonjs",
   "main": "index.js",
+  "dependencies": {
+    "sharp": "^0.34.3"
+  },
   "scripts": {
     "start": "node index.js"
   }

@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const os = require('os');
 const { Worker } = require('worker_threads');
+const sharp = require('sharp');
 
 const LATEST_RELEASE_ABI = '10.11';
 
@@ -27,11 +28,16 @@ if (trueValues.includes(arg2Lower)) {
 }
 
 const pluginDir = path.join('./plugins', 'images');
+const pluginDir12 = path.join(pluginDir, '12');
 const imageBaseUrl = 'https://obelo.us/plugins/images/';
 const fallbackImageUrl = 'https://dl.obelous.dev/public/upr-missing.png';
+const badgeAssetPath = path.join(__dirname, 'assets', '12badge.png');
+const NORMALIZED_WIDTH = 576;
+const NORMALIZED_HEIGHT = 324;
 const sanitizedAgentVersion = (agentArg || '10.0.0.0').replace(/[^a-zA-Z0-9._-]/g, '');
 const agentLabel = (agentArg || 'universal').replace(/[^a-zA-Z0-9._-]/g, '') || 'universal';
 const isTwelveRequest = sanitizedAgentVersion.startsWith('12.0');
+const twelveFallbackAbis = ['10.11', '10.10'];
 const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion)
     ? sanitizedAgentVersion
     : `Jellyfin-Server/${sanitizedAgentVersion}`;
@@ -72,6 +78,14 @@ function pluginSupportsRequestedAbi(plugin, requestedAbiPrefix) {
     return pluginVersions.some((version) => {
         const abi = version.targetAbi || version.TargetAbi || '';
         return typeof abi === 'string' && abi.startsWith(requestedAbiPrefix);
+    });
+}
+
+function pluginSupportsAnyAbi(plugin, abiPrefixes) {
+    const pluginVersions = plugin.versions || plugin.Versions || [];
+    return pluginVersions.some((version) => {
+        const abi = String(version.targetAbi || version.TargetAbi || '');
+        return abiPrefixes.some((prefix) => abi.startsWith(prefix));
     });
 }
 
@@ -294,7 +308,7 @@ async function getSources(sourceFile){
                     const guid = plugin.guid || plugin.Guid;
                     if (!guid) continue;
 
-                    if (isTwelveRequest && !pluginSupportsRequestedAbi(plugin, '12.0')) {
+                    if (isTwelveRequest && !pluginSupportsAnyAbi(plugin, ['12.0', ...twelveFallbackAbis])) {
                         continue;
                     }
 
@@ -305,7 +319,7 @@ async function getSources(sourceFile){
                         for (const v of pluginVersions) {
                             const abi = v.targetAbi || v.TargetAbi || '';
                             if (abi && !isVersionMatch(abi, sourceMeta.targetConstraint)) {
-                                logger.info(`[compat] "${sourceMeta.manifestUrl}" (config: ${sourceMeta.targetConstraint}) contains a plugin which targets ${abi} which is outside of the configured range`);
+                                logger.info(`[compat] "${sourceMeta.manifestUrl}" targets ${abi} which is outside of the configured range ${sourceMeta.targetConstraint}`);
                             }
 
                             if (abi.startsWith(LATEST_RELEASE_ABI)) {
@@ -313,7 +327,7 @@ async function getSources(sourceFile){
                             }
                         }
                         if ((sourceMeta.targetConstraint === '.' || sourceMeta.targetConstraint === '*.*') && !hasLatestAbi) {
-                            logger.info(`[compat] "${sourceMeta.manifestUrl}" is configured with *.* and lacks a version targeting latest release (${LATEST_RELEASE_ABI})`);
+                            logger.info(`[compat] "${sourceMeta.manifestUrl}" is configured with *.* but lacks a version targeting latest jellyfin version (${LATEST_RELEASE_ABI})`);
                         }
                     }
 
@@ -356,16 +370,47 @@ async function downloadImage(url, filename) {
         const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
         if (!res.ok) throw new Error(`Failed to fetch image: ${res.status}`);
         const buffer = await res.arrayBuffer();
-        await fs.writeFile(path.join(pluginDir, filename), Buffer.from(buffer));
+        await sharp(Buffer.from(buffer))
+            .resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' })
+            .jpeg({ quality: 90 })
+            .toFile(path.join(pluginDir, filename));
         return true;
     } catch {
         return false;
     }
 }
 
-function getImageExtension(url) {
-    const ext = path.extname(new URL(url).pathname);
-    return ext || '.png';
+async function normalizeExistingImage(sourceFilename, outputFilename) {
+    try {
+        await sharp(path.join(pluginDir, sourceFilename))
+            .resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' })
+            .jpeg({ quality: 90 })
+            .toFile(path.join(pluginDir, outputFilename));
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function createTwelveBadgedImage(filename) {
+    const sourcePath = path.join(pluginDir, filename);
+    const outputPath = path.join(pluginDir12, filename);
+
+    try {
+        const badgeBuffer = await sharp(badgeAssetPath)
+            .resize(50, 50, { fit: 'fill' })
+            .png()
+            .toBuffer();
+
+        await sharp(sourcePath)
+            .composite([{ input: badgeBuffer, gravity: 'east' }])
+            .toFile(outputPath);
+
+        return true;
+    } catch (err) {
+        logger.error(`error creating 12.0 badge image for ${filename}: ${err.message}`);
+        return false;
+    }
 }
 
 async function imageExists(filename) {
@@ -438,9 +483,11 @@ async function processImages(pluginData) {
     logger.info(`processing images for ${pluginData.length} plugins`);
 
     let downloaded = 0;
+    let normalized = 0;
     let reused = 0;
     let fallbackCount = 0;
     let renamed = 0;
+    let badged = 0;
 
     for (const plugin of pluginData) {
         if (!plugin.imageUrl) {
@@ -450,13 +497,15 @@ async function processImages(pluginData) {
         }
 
         if (plugin.imageUrl) {
-            const ext = getImageExtension(plugin.imageUrl);
             let pluginId = getPluginId(plugin);
             if (!pluginId) {
                 pluginId = hashString(plugin.imageUrl);
             }
-            const legacyFilename = `${pluginId}${ext}`;
-            const filename = `${sanitizeImageName(pluginId)}${ext}`;
+            const rawId = String(pluginId);
+            const legacyExt = path.extname(new URL(plugin.imageUrl).pathname) || '.png';
+            const legacyFilename = `${rawId}${legacyExt}`;
+            const sanitizedId = sanitizeImageName(rawId);
+            const filename = `${sanitizedId}.jpg`;
             const shouldDownload = regenImages || !(await imageExists(filename));
 
             if (filename !== legacyFilename && !shouldDownload && await imageExists(legacyFilename)) {
@@ -469,22 +518,63 @@ async function processImages(pluginData) {
             }
 
             if (shouldDownload) {
+                let didDownload = false;
                 const success = await downloadImage(plugin.imageUrl, filename);
                 if (!success) {
-                    plugin.imageUrl = fallbackImageUrl;
-                    fallbackCount++;
-                    continue;
+                    const fallbackCandidates = [
+                        `${sanitizedId}${legacyExt}`,
+                        `${rawId}${legacyExt}`,
+                        legacyFilename,
+                        `${sanitizedId}.png`,
+                        `${rawId}.png`,
+                        `${sanitizedId}.webp`,
+                        `${rawId}.webp`,
+                        `${sanitizedId}.jpeg`,
+                        `${rawId}.jpeg`,
+                        `${sanitizedId}.jpg`,
+                        `${rawId}.jpg`
+                    ];
+
+                    let normalizedFromExisting = false;
+                    for (const candidate of fallbackCandidates) {
+                        if (!(await imageExists(candidate))) {
+                            continue;
+                        }
+                        if (await normalizeExistingImage(candidate, filename)) {
+                            normalizedFromExisting = true;
+                            normalized++;
+                            break;
+                        }
+                    }
+
+                    if (!normalizedFromExisting) {
+                        plugin.imageUrl = fallbackImageUrl;
+                        fallbackCount++;
+                        continue;
+                    }
+                } else {
+                    didDownload = true;
                 }
-                downloaded++;
+                if (didDownload) {
+                    downloaded++;
+                }
             } else {
                 reused++;
             }
             if (shouldDownload || await imageExists(filename)) {
                 plugin.imageUrl = imageBaseUrl + filename;
+
+                if (isTwelveRequest && pluginSupportsRequestedAbi(plugin, '12.0')) {
+                    const created = await createTwelveBadgedImage(filename);
+                    if (created) {
+                        plugin.imageUrl = imageBaseUrl + '12/' + filename;
+                        badged++;
+                    }
+                }
             }
         }
     }
-    logger.info(`images complete: downloaded ${downloaded}, reused ${reused}, renamed ${renamed}, fallback ${fallbackCount}`);
+    logger.info(`images complete: downloaded ${downloaded}, normalized ${normalized}, reused ${reused}, renamed ${renamed}, badged ${badged}, fallback ${fallbackCount}`);
 }
 
 async function writeManifest(manifestJson, outputFile, pluginCount){
@@ -547,6 +637,7 @@ async function processList(sourceFile, outputFile) {
 async function main() {
     try{await fs.mkdir('./plugins/')}catch(err){}
     try{await fs.mkdir(pluginDir, { recursive: true })}catch(err){}
+    try{await fs.mkdir(pluginDir12, { recursive: true })}catch(err){}
     
     initializeWorkerPool();
     initializeManifestWorkerPool();
