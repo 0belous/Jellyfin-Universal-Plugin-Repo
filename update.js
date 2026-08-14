@@ -36,8 +36,8 @@ const NORMALIZED_WIDTH = 576;
 const NORMALIZED_HEIGHT = 324;
 const sanitizedAgentVersion = (agentArg || '10.0.0.0').replace(/[^a-zA-Z0-9._-]/g, '');
 const agentLabel = (agentArg || 'universal').replace(/[^a-zA-Z0-9._-]/g, '') || 'universal';
-const isTwelveRequest = sanitizedAgentVersion.startsWith('12.0');
 const twelveFallbackAbis = ['10.11', '10.10'];
+const isTwelveRequest = /^12(?:[._-]|$)/.test(sanitizedAgentVersion) || sanitizedAgentVersion === '12';
 const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion)
     ? sanitizedAgentVersion
     : `Jellyfin-Server/${sanitizedAgentVersion}`;
@@ -85,11 +85,31 @@ function isVersionMatch(target, constraint) {
     });
 }
 
+function matchesAbiPrefix(abi, prefix) {
+    const normalizedAbi = String(abi || '').trim();
+    const normalizedPrefix = String(prefix || '').trim();
+
+    if (!normalizedAbi || !normalizedPrefix) {
+        return false;
+    }
+
+    const wildcardPrefix = normalizedPrefix.endsWith('.*') ? normalizedPrefix.slice(0, -2) : normalizedPrefix;
+    if (!wildcardPrefix) {
+        return false;
+    }
+
+    return normalizedAbi === wildcardPrefix
+        || normalizedAbi.startsWith(`${wildcardPrefix}.`)
+        || normalizedAbi.startsWith(`${wildcardPrefix}-`)
+        || normalizedAbi.startsWith(`${wildcardPrefix}_`)
+        || normalizedAbi.startsWith(wildcardPrefix);
+}
+
 function pluginSupportsRequestedAbi(plugin, requestedAbiPrefix) {
     const pluginVersions = plugin.versions || plugin.Versions || [];
     return pluginVersions.some((version) => {
         const abi = version.targetAbi || version.TargetAbi || '';
-        return typeof abi === 'string' && abi.startsWith(requestedAbiPrefix);
+        return typeof abi === 'string' && matchesAbiPrefix(abi, requestedAbiPrefix);
     });
 }
 
@@ -97,7 +117,7 @@ function pluginSupportsAnyAbi(plugin, abiPrefixes) {
     const pluginVersions = plugin.versions || plugin.Versions || [];
     return pluginVersions.some((version) => {
         const abi = String(version.targetAbi || version.TargetAbi || '');
-        return abiPrefixes.some((prefix) => abi.startsWith(prefix));
+        return abiPrefixes.some((prefix) => matchesAbiPrefix(abi, prefix));
     });
 }
 
@@ -320,9 +340,9 @@ async function getSources(sourceFile){
                     const guid = plugin.guid || plugin.Guid;
                     if (!guid) continue;
 
-                    const hasExactTwelveAbi = pluginSupportsRequestedAbi(plugin, '12.0');
+                    const hasExactTwelveAbi = pluginSupportsRequestedAbi(plugin, '12.*');
 
-                    if (isTwelveRequest && !pluginSupportsAnyAbi(plugin, ['12.0', ...twelveFallbackAbis])) {
+                    if (isTwelveRequest && !pluginSupportsAnyAbi(plugin, ['12.*', ...twelveFallbackAbis])) {
                         continue;
                     }
 
