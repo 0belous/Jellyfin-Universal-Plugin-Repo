@@ -69,8 +69,20 @@ const logger = createLogger(agentLabel);
 
 function isVersionMatch(target, constraint) {
     if (!constraint || constraint === '.' || constraint === '*.*') return true;
-    const allowed = constraint.split(',').map(v => v.trim());
-    return allowed.some(v => target.startsWith(v));
+
+    const normalizedTarget = String(target || '').trim();
+    const allowed = constraint.split(',').map(v => v.trim()).filter(Boolean);
+
+    return allowed.some((pattern) => {
+        if (!pattern || pattern === '.' || pattern === '*.*' || pattern === '*') return true;
+
+        const wildcardPattern = pattern
+            .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+            .replace(/\\\*/g, '.*');
+
+        const regex = new RegExp(`^${wildcardPattern}$`);
+        return regex.test(normalizedTarget) || normalizedTarget.startsWith(pattern.replace(/\*+$/, ''));
+    });
 }
 
 function pluginSupportsRequestedAbi(plugin, requestedAbiPrefix) {
