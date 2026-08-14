@@ -308,6 +308,8 @@ async function getSources(sourceFile){
                     const guid = plugin.guid || plugin.Guid;
                     if (!guid) continue;
 
+                    const hasExactTwelveAbi = pluginSupportsRequestedAbi(plugin, '12.0');
+
                     if (isTwelveRequest && !pluginSupportsAnyAbi(plugin, ['12.0', ...twelveFallbackAbis])) {
                         continue;
                     }
@@ -332,7 +334,8 @@ async function getSources(sourceFile){
                     }
 
                     plugin._metaSourceUrl = sourceMeta.manifestUrl;
-                    plugin._metaGithubUrl = sourceMeta.githubUrl; 
+                    plugin._metaGithubUrl = sourceMeta.githubUrl;
+                    plugin._metaHasExactTwelveAbi = hasExactTwelveAbi;
                     plugins.push(plugin);
                     added++;
                 }
@@ -490,8 +493,11 @@ async function processImages(pluginData) {
     let badged = 0;
 
     for (const plugin of pluginData) {
+        const shouldBadgeForTwelve = Boolean(isTwelveRequest && plugin._metaHasExactTwelveAbi === true);
+
         if (!plugin.imageUrl) {
             plugin.imageUrl = fallbackImageUrl;
+            delete plugin._metaHasExactTwelveAbi;
             fallbackCount++;
             continue;
         }
@@ -549,6 +555,7 @@ async function processImages(pluginData) {
 
                     if (!normalizedFromExisting) {
                         plugin.imageUrl = fallbackImageUrl;
+                        delete plugin._metaHasExactTwelveAbi;
                         fallbackCount++;
                         continue;
                     }
@@ -564,7 +571,7 @@ async function processImages(pluginData) {
             if (shouldDownload || await imageExists(filename)) {
                 plugin.imageUrl = imageBaseUrl + filename;
 
-                if (isTwelveRequest && pluginSupportsRequestedAbi(plugin, '12.0')) {
+                if (shouldBadgeForTwelve) {
                     const created = await createTwelveBadgedImage(filename);
                     if (created) {
                         plugin.imageUrl = imageBaseUrl + '12/' + filename;
@@ -572,6 +579,8 @@ async function processImages(pluginData) {
                     }
                 }
             }
+
+            delete plugin._metaHasExactTwelveAbi;
         }
     }
     logger.info(`images complete: downloaded ${downloaded}, normalized ${normalized}, reused ${reused}, renamed ${renamed}, badged ${badged}, fallback ${fallbackCount}`);
