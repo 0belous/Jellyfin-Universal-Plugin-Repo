@@ -4,7 +4,7 @@ The universal plugin repository for **Jellyfin Media Server**.
 
 ## Why this repo exists
 Managing multiple Jellyfin plugin repositories can get messy fast. This project provides:
-- **one primary catalogue URL** for plugins
+- **one universal catalogue URL** for plugins
 - automatic feed updates and duplicate merging
 - a simpler setup flow for self-hosted Jellyfin users
 
@@ -20,25 +20,18 @@ https://obelo.us/upr
 4. Add the main catalogue URL shown above.
 5. Save the configuration and refresh your available plugins.
 
+## Ready for Jellyfin 12
+Look for the <img src="https://github.com/0belous/Jellyfin-Universal-Plugin-Repo/blob/main/assets/12badge.png?raw=true" style="width:20px; transform:translate(0px,5px); margin-left:2px; margin-right:2px;"> symbol to find plugins explicitly marked as compatible with jellyfin version 12<br>
+Older plugins may still work, but most plugins will break due to sweeping API changes.
+
 ## How this project is maintained
 The update pipeline is driven by `update.js`.
 
 It does the following:
 - reads source repository lists from `sources.txt`
 - fetches upstream plugin JSON feeds
-- downloads and refreshes image assets
-- outputs normalized manifests for Jellyfin clients
-
-## Project structure
-```text
-.
-├── README.md           # Project overview and setup instructions
-├── update.js           # Aggregation and manifest generation script
-├── index.js            # Serves generated manifests and images
-├── sources.txt         # Upstream plugin feed list
-├── manifest.json       # Generated main catalogue manifest
-└── images/             # Downloaded plugin artwork/assets
-```
+- downloads and converts image assets
+- outputs manifest to be served by `index.js` for jellyfin clients
 
 ## Security notes
 Most upstream sources come from reputable community-maintained Jellyfin plugin repositories, including entries referenced from [awesome-jellyfin](https://github.com/awesome-jellyfin/awesome-jellyfin).
@@ -53,7 +46,7 @@ A few practical notes:
 If you want to add a missing plugin source:
 1. update `sources.txt`
 2. regenerate the manifests with `node update.js`
-3. open a pull request with the new source and any context maintainers should know
+3. open a pull request with your changes
 
 ## Star history
 <a href="https://www.star-history.com/?repos=0belous%2FJellyfin-Universal-Catalogue&type=date&legend=top-left">
