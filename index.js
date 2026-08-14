@@ -441,7 +441,8 @@ async function start() {
 
 		const imageMatch = routePath.match(/^\/images\/(.+\.(png|jpg|jpeg|gif|webp|ico|svg))$/i);
 		if (imageMatch) {
-			if (imageMatch[1].startsWith('12/') && !isTwelveAgent(req.headers['user-agent'] || '')) {
+			const rawUserAgent = req.headers['user-agent'] || '';
+			if (imageMatch[1].startsWith('12/') && isJellyfinUserAgent(rawUserAgent) && !isTwelveAgent(rawUserAgent)) {
 				res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
 				res.end('Not found');
 				return;
