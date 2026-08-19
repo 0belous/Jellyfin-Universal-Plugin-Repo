@@ -1,58 +1,118 @@
-# Jellyfin Universal Catalogue
+# Jellyfin Universal Plugin Repository
 
-The universal plugin repository for **Jellyfin Media Server**.
+Jellyfin Universal Repository combines plugin manifests from multiple repositories and serves a manifest for Jellyfin clients.
 
-## Why this repo exists
-Managing multiple Jellyfin plugin repositories can get messy fast. This project provides:
-- **one universal catalogue URL** for plugins
-- automatic feed updates and duplicate merging
-- a simpler setup flow for self-hosted Jellyfin users
+## Add the catalogue to Jellyfin
 
-## Manifest URL
+Add this URL as a plugin repository in the Jellyfin administrator dashboard:
+
 ```text
 https://obelo.us/upr
 ```
 
-## Installation
-1. Open the Jellyfin admin dashboard.
-2. Go to the plugin or catalogue repository settings.
-3. Remove outdated repository entries if you previously added multiple plugin feeds.
-4. Add the main catalogue URL shown above.
-5. Save the configuration and refresh your available plugins.
+To add the repository:
 
-## Ready for Jellyfin 12
-Look for the <img src="https://github.com/0belous/Jellyfin-Universal-Plugin-Repo/blob/main/assets/12badge.png?raw=true" style="width:20px; transform:translate(0px,5px); margin-left:2px; margin-right:2px;"> symbol to find plugins explicitly marked as compatible with jellyfin version 12<br>
-Older plugins may still work, but most plugins will break due to sweeping API changes.
+1. Sign in to the Jellyfin administrator dashboard.
+2. Open **Dashboard > Plugins > Repositories**.
+3. Remove an older Universal Plugin Repo URL, if you added one.
+4. Add `https://obelo.us/upr` as the repository URL.
+5. Save the repository and refresh the plugin catalogue.
 
-## How this project is maintained
-The update pipeline is driven by `update.js`.
+The old GitHub-hosted manifest is deprecated. See [deprecation.md](deprecation.md) for details.
 
-It does the following:
-- reads source repository lists from `sources.txt`
-- fetches upstream plugin JSON feeds
-- downloads and converts image assets
-- outputs manifest to be served by `index.js` for jellyfin clients
+## Jellyfin 12 compatibility
 
-## Security notes
-Most upstream sources come from reputable community-maintained Jellyfin plugin repositories, including entries referenced from [awesome-jellyfin](https://github.com/awesome-jellyfin/awesome-jellyfin).
+The catalogue includes a badge for plugins with an exact Jellyfin 12 ABI.
 
-A few practical notes:
-- this project helps reduce direct exposure to many separate repository endpoints
-- new sources are reviewed before inclusion
-- installing a plugin still means trusting that plugin's code
-- users should continue to install only plugins they recognize or have reviewed
+Check a plugin's supported ABI before installing it. A plugin that does not provide a compatible version might not work with your Jellyfin server.
 
-## Contributing
-If you want to add a missing plugin source:
-1. update `sources.txt`
-2. regenerate the manifests with `node update.js`
-3. open a pull request with your changes
+## How the catalogue works
 
-## Star history
-<a href="https://www.star-history.com/?repos=0belous%2FJellyfin-Universal-Catalogue&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&theme=dark&legend=top-left&sealed_token=TihnkVXJsM47qRbiulumvHT2vk21i75_fysAohZQHwQZOQB0Jc31huqgOQasKeBlc4jh3HT4tQgKHnFOVuf-5i92xQi1JcoPhrXbQsS7G9GHS9mGPjhPAT26Pm17bWAVq3YAl5YTMHeV2REbokWWSUXO57GDPsuJOezbHGiSwdhqY5txbiXd6FcHXxu-" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left&sealed_token=TihnkVXJsM47qRbiulumvHT2vk21i75_fysAohZQHwQZOQB0Jc31huqgOQasKeBlc4jh3HT4tQgKHnFOVuf-5i92xQi1JcoPhrXbQsS7G9GHS9mGPjhPAT26Pm17bWAVq3YAl5YTMHeV2REbokWWSUXO57GDPsuJOezbHGiSwdhqY5txbiXd6FcHXxu-" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=0belous/Jellyfin-Universal-Catalogue&type=date&legend=top-left&sealed_token=TihnkVXJsM47qRbiulumvHT2vk21i75_fysAohZQHwQZOQB0Jc31huqgOQasKeBlc4jh3HT4tQgKHnFOVuf-5i92xQi1JcoPhrXbQsS7G9GHS9mGPjhPAT26Pm17bWAVq3YAl5YTMHeV2REbokWWSUXO57GDPsuJOezbHGiSwdhqY5txbiXd6FcHXxu-" />
- </picture>
-</a>
+The service performs these steps:
+
+1. Reads manifest sources from [`sources.txt`](sources.txt).
+2. Fetches the upstream JSON manifests.
+3. Filters sources and plugin versions for the requesting Jellyfin version.
+4. Normalizes plugin metadata and removes self-dependencies.
+5. Downloads and normalizes plugin images.
+6. Writes a manifest for the requesting Jellyfin user agent.
+7. Serves the manifest from `/upr`.
+
+The server stores generated files in the `plugins` directory. It refreshes known user-agent manifests hourly and removes agents that have not been seen for about one month.
+
+## Run the service locally
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Start the server
+
+```bash
+npm start
+```
+
+By default, the server listens on `0.0.0.0:3000`. Set these environment variables to change the listener:
+
+```bash
+HOST=127.0.0.1 PORT=3000 npm start
+```
+
+## Generate a manifest
+
+Run the update script from the repository root:
+
+```bash
+node update.js
+```
+
+This writes a manifest for the `universal` agent to `plugins/manifest.universal.json`. To generate a manifest for a specific Jellyfin server version, pass `false` and the version as arguments:
+
+```bash
+node update.js false 10.11.0.0
+```
+
+To remove existing images and download them again, pass `true` instead:
+
+```bash
+node update.js true 10.11.0.0
+```
+
+The update script uses the third field in each `sources.txt` entry to select compatible sources. Use `*.*` for all versions or a comma-separated list for specific versions.
+
+## Add a plugin source
+
+Each source entry uses this format:
+
+```text
+manifest URL | repository URL | Jellyfin version constraint
+```
+
+For example:
+
+```text
+https://example.com/manifest.json | https://github.com/example/plugin | 10.11,12.0
+```
+
+When you add a source:
+
+1. Add the entry to [`sources.txt`](sources.txt) in alphabetical order.
+2. Run `node update.js` to check that the source can be fetched and processed.
+3. Review the generated files and open a pull request.
+
+## Security
+
+This project distributes metadata and download information from third-party plugin repositories. Installing a plugin means trusting the plugin author and the code they publish.
+
+Review a plugin's source repository before installing it. Adding a repository to this catalogue does not make the plugin safe or imply that the project has audited its code.
+
+## Repository layout
+
+- [`index.js`](index.js): starts the HTTP server and serves manifests and images.
+- [`update.js`](update.js): fetches sources and generates manifests.
+- [`fetch-worker.js`](fetch-worker.js): fetches upstream manifests in worker threads.
+- [`manifest-worker.js`](manifest-worker.js): transforms and serializes manifest data.
+- [`sources.txt`](sources.txt): lists upstream manifest sources and version constraints.
+- [`plugins/`](plugins/): contains generated manifests and image assets.
