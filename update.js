@@ -517,20 +517,12 @@ function sanitizePlugins(plugins) {
 async function processImages(pluginData) {
     logger.info(`processing images for ${pluginData.length} plugins`);
 
-    let downloaded = 0;
-    let normalized = 0;
-    let reused = 0;
-    let fallbackCount = 0;
-    let renamed = 0;
-    let badged = 0;
-
     for (const plugin of pluginData) {
         const shouldBadgeForTwelve = Boolean(isTwelveRequest && plugin._metaHasExactTwelveAbi === true);
 
         if (!plugin.imageUrl) {
             plugin.imageUrl = fallbackImageUrl;
             delete plugin._metaHasExactTwelveAbi;
-            fallbackCount++;
             continue;
         }
 
@@ -549,14 +541,12 @@ async function processImages(pluginData) {
             if (filename !== legacyFilename && !shouldDownload && await imageExists(legacyFilename)) {
                 try {
                     await fs.rename(path.join(pluginDir, legacyFilename), path.join(pluginDir, filename));
-                    renamed++;
                 } catch (err) {
                     logger.error(`error renaming image ${legacyFilename}: ${err.message}`);
                 }
             }
 
             if (shouldDownload) {
-                let didDownload = false;
                 const success = await downloadImage(plugin.imageUrl, filename);
                 if (!success) {
                     const fallbackCandidates = [
@@ -580,7 +570,6 @@ async function processImages(pluginData) {
                         }
                         if (await normalizeExistingImage(candidate, filename)) {
                             normalizedFromExisting = true;
-                            normalized++;
                             break;
                         }
                     }
@@ -588,17 +577,9 @@ async function processImages(pluginData) {
                     if (!normalizedFromExisting) {
                         plugin.imageUrl = fallbackImageUrl;
                         delete plugin._metaHasExactTwelveAbi;
-                        fallbackCount++;
                         continue;
                     }
-                } else {
-                    didDownload = true;
                 }
-                if (didDownload) {
-                    downloaded++;
-                }
-            } else {
-                reused++;
             }
             if (shouldDownload || await imageExists(filename)) {
                 plugin.imageUrl = imageBaseUrl + filename;
@@ -607,7 +588,6 @@ async function processImages(pluginData) {
                     const created = await createTwelveBadgedImage(filename);
                     if (created) {
                         plugin.imageUrl = imageBaseUrl + '12/' + filename;
-                        badged++;
                     }
                 }
             }
@@ -615,7 +595,6 @@ async function processImages(pluginData) {
             delete plugin._metaHasExactTwelveAbi;
         }
     }
-    logger.info(`images complete: downloaded ${downloaded}, normalized ${normalized}, reused ${reused}, renamed ${renamed}, badged ${badged}, fallback ${fallbackCount}`);
 }
 
 async function writeManifest(manifestJson, outputFile, pluginCount){
@@ -629,6 +608,29 @@ async function writeManifest(manifestJson, outputFile, pluginCount){
         logger.error(`error writing manifest file ${outputFile}: ${err.message}`);
     }
     logger.info(`manifest written: ${outputFile} (${pluginCount} total plugins)`);
+}
+
+function logConflictingPluginGuids(plugins) {
+    const namesByGuid = new Map();
+
+    for (const plugin of plugins) {
+        const guid = String(plugin.guid || plugin.Guid || '').trim().toLowerCase();
+        if (!guid) {
+            continue;
+        }
+
+        if (!namesByGuid.has(guid)) {
+            namesByGuid.set(guid, new Set());
+        }
+        namesByGuid.get(guid).add(String(plugin.name || '').trim());
+    }
+
+    for (const [guid, names] of namesByGuid) {
+        names.delete('');
+        if (names.size > 1) {
+            logger.error(`conflicting plugin UUID ${guid} is used by different names: ${Array.from(names).join(', ')}`);
+        }
+    }
 }
 
 async function processList(sourceFile, outputFile) {
@@ -671,6 +673,7 @@ async function processList(sourceFile, outputFile) {
         logger.info(`merge complete: ${plugins.length}`);
         await processImages(plugins);
         const manifestJson = await stringifyManifestInWorker(plugins);
+        logConflictingPluginGuids(plugins);
         await writeManifest(manifestJson, outputFile, plugins.length);
     }
 }

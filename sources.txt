@@ -41,7 +41,6 @@ https://raw.githubusercontent.com/apteryxxyz/jellyfin-plugin-airtimes/main/manif
 https://raw.githubusercontent.com/arnesacnussem/jellyfin-plugin-meilisearch/refs/heads/master/manifest.json | https://github.com/arnesacnussem/jellyfin-plugin-meilisearch | *.*
 https://raw.githubusercontent.com/axolmain/jellyfin-otel-plugin/master/manifest.json | https://github.com/axolmain/jellyfin-otel-plugin | *.*
 https://raw.githubusercontent.com/BlackDark/jellyfin-plugin-empty-folder-cleaner/refs/heads/manifests/manifest.json | https://github.com/BlackDark/jellyfin-plugin-empty-folder-cleaner | *.*
-https://raw.githubusercontent.com/bobbibg/jellyfin-plugin-cypherflix-hub/refs/heads/main/manifest.json | https://github.com/bobbibg/jellyfin-plugin-cypherflix-hub | *.*
 https://raw.githubusercontent.com/builtbyproxy/jellyfin-plugin-letterboxd/main/manifest.json | https://github.com/builtbyproxy/jellyfin-plugin-letterboxd | *.*
 https://raw.githubusercontent.com/CapstonPeters/Jellyfin-Hide-Empty-Folders/HEAD/manifest.json | https://github.com/CapstonPeters/Jellyfin-Hide-Empty-Folders | *.*
 https://raw.githubusercontent.com/CatNoir2006/jellyfin-plugin-manifest/main/manifest.json | https://github.com/CatNoir2006/jellyfin-plugin-MediathekViewDL | *.*
