@@ -643,7 +643,7 @@ async function processImages(pluginData) {
             }
         }
 
-        plugin.imageUrl = imageBaseUrl + `${agentLabel}/${filename}`;
+        plugin.imageUrl = `${imageBaseUrl}${agentLabel}/${filename}`;
     }));
 }
 
@@ -718,13 +718,16 @@ async function processList(sourceFile, outputFile) {
         logger.error(`error creating dummy plugin: ${err.message}`);
     }
 
-    if (plugins.length > 0) {
+if (plugins.length > 0) {
         plugins = await transformPluginsInWorkers(plugins);
         logger.info(`merge complete: ${plugins.length}`);
-        await processImages(plugins);
+        await processImages(plugins); 
         const manifestJson = await stringifyManifestInWorker(plugins);
         logConflictingPluginGuids(plugins);
         await writeManifest(manifestJson, outputFile, plugins.length);
+        if (agentLabel === 'universal') {
+            await writeManifest(manifestJson, path.join('./plugins', 'manifest.json'), plugins.length);
+        }
     }
 }
 
