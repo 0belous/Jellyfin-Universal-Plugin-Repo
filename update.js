@@ -32,6 +32,7 @@ const logger = {
 };
 
 const hashString = (s) => crypto.createHash('md5').update(s).digest('hex');
+const isBlockedHost = (u) => !u || /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.0\.0\.0)/i.test(new URL(u).hostname);
 const isVersionMatch = (t, c) => !c || c === '.' || c === '*.*' || c.split(',').some(p => new RegExp(`^${p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`).test(t) || t.startsWith(p.replace(/\*+$/, '')));
 const matchesAbiPrefix = (a, p) => a && p && (a === p.replace(/\.\*$/, '') || a.startsWith(p.replace(/\.\*$/, '') + '.') || a.startsWith(p.replace(/\.\*$/, '') + '-') || a.startsWith(p.replace(/\.\*$/, '')));
 const pluginSupportsAnyAbi = (p, prefixes) => (p.versions || p.Versions || []).some(v => prefixes.some(pre => matchesAbiPrefix(String(v.targetAbi || v.TargetAbi || ''), pre)));
@@ -93,6 +94,7 @@ function transformPlugins(plugins, genTime) {
 }
 
 async function fetchSource(url) {
+    if (isBlockedHost(url)) throw new Error('Blocked host');
     const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
@@ -124,6 +126,7 @@ async function getSources(file) {
 
 async function processSinglePass(url, filename, score) {
     try {
+        if (isBlockedHost(url)) return false;
         const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
         if (!res.ok) throw new Error();
         let pipeline = sharp(Buffer.from(await res.arrayBuffer())).resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' });
