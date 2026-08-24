@@ -142,7 +142,14 @@ async function saveKnownAgents() {
 }
 
 async function removeAgentData(agentId) {
+	if (!agentId) {
+		return;
+	}
 
+	await Promise.allSettled([
+		fs.rm(path.join(PLUGINS_DIR, `manifest.${agentId}.json`), { force: true }),
+		fs.rm(path.join(IMAGES_DIR, agentId), { recursive: true, force: true })
+	]);
 }
 
 async function pruneExpiredAgents() {
@@ -382,11 +389,6 @@ async function servePluginAsset(res, filename) {
 	await serveFile(res, absolute);
 }
 
-function isTwelveAgent(rawUserAgent) {
-	const normalized = normalizeUserAgent(rawUserAgent);
-	return Boolean(normalized && normalized.startsWith('12.0'));
-}
-
 async function handleManifestRequest(req, res, manifestName) {
 	const ua = req.headers['user-agent'] || '';
 	if (!isJellyfinUserAgent(ua)) {
@@ -441,13 +443,6 @@ async function start() {
 
 		const imageMatch = routePath.match(/^\/images\/(.+\.(png|jpg|jpeg|gif|webp|ico|svg))$/i);
 		if (imageMatch) {
-			const rawUserAgent = req.headers['user-agent'] || '';
-			if (imageMatch[1].startsWith('12/') && isJellyfinUserAgent(rawUserAgent) && !isTwelveAgent(rawUserAgent)) {
-				res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-				res.end('Not found');
-				return;
-			}
-
 			servePluginAsset(res, imageMatch[1]).catch((error) => {
 				console.error('Failed to serve plugin asset:', error.message);
 				res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });

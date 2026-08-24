@@ -20,11 +20,12 @@ To add the repository:
 
 The old GitHub-hosted manifest is deprecated. See [deprecation.md](deprecation.md) for details.
 
-## Jellyfin 12 compatibility
+## Jellyfin compatibility
 
-The catalogue includes a badge for plugins with an exact Jellyfin 12 ABI.
-
-Check a plugin's supported ABI before installing it. A plugin that does not provide a compatible version might not work with your Jellyfin server.
+Look for the single double and triple check marks to see how many of the X.Y.Z digits of your jellyfin version a plugin says it supports.
+Generally a double checkmark is great.
+Triple checkmark means the developer tested their plugin on your exact jellyfin version. 
+Some plugins may not have any checkmark and still work, consult the original documentation to find out if this is the case.
 
 ## How the catalogue works
 

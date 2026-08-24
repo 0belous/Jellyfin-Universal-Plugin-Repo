@@ -28,10 +28,8 @@ if (trueValues.includes(arg2Lower)) {
 }
 
 const pluginDir = path.join('./plugins', 'images');
-const pluginDir12 = path.join(pluginDir, '12');
 const imageBaseUrl = 'https://obelo.us/plugins/images/';
 const fallbackImageUrl = 'https://dl.obelous.dev/public/upr-missing.png';
-const badgeAssetPath = path.join(__dirname, 'assets', '12badge.png');
 const NORMALIZED_WIDTH = 576;
 const NORMALIZED_HEIGHT = 324;
 const sanitizedAgentVersion = (agentArg || '10.0.0.0').replace(/[^a-zA-Z0-9._-]/g, '');
@@ -66,6 +64,13 @@ function createLogger(label) {
 }
 
 const logger = createLogger(agentLabel);
+
+const ABI_BADGE = {
+    0: { label: '', bg: '', fg: '' },
+    1: { label: '✓', bg: '#1d4ed8', fg: '#ffffff' },
+    2: { label: '✓✓', bg: '#15803d', fg: '#ffffff' },
+    3: { label: '✓✓✓', bg: '#15803d', fg: '#ffffff' }
+};
 
 function isVersionMatch(target, constraint) {
     if (!constraint || constraint === '.' || constraint === '*.*') return true;
@@ -340,8 +345,6 @@ async function getSources(sourceFile){
                     const guid = plugin.guid || plugin.Guid;
                     if (!guid) continue;
 
-                    const hasExactTwelveAbi = pluginSupportsRequestedAbi(plugin, '12.*');
-
                     if (isTwelveRequest && !pluginSupportsAnyAbi(plugin, ['12.*', ...twelveFallbackAbis])) {
                         continue;
                     }
@@ -367,7 +370,6 @@ async function getSources(sourceFile){
 
                     plugin._metaSourceUrl = sourceMeta.manifestUrl;
                     plugin._metaGithubUrl = sourceMeta.githubUrl;
-                    plugin._metaHasExactTwelveAbi = hasExactTwelveAbi;
                     plugins.push(plugin);
                     added++;
                 }
@@ -407,7 +409,7 @@ async function downloadImage(url, filename) {
         const buffer = await res.arrayBuffer();
         await sharp(Buffer.from(buffer))
             .resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' })
-            .jpeg({ quality: 90 })
+            .jpeg({ quality: 98 })
             .toFile(path.join(pluginDir, filename));
         return true;
     } catch {
@@ -419,7 +421,7 @@ async function normalizeExistingImage(sourceFilename, outputFilename) {
     try {
         await sharp(path.join(pluginDir, sourceFilename))
             .resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' })
-            .jpeg({ quality: 90 })
+            .jpeg({ quality: 98 })
             .toFile(path.join(pluginDir, outputFilename));
         return true;
     } catch {
@@ -427,23 +429,76 @@ async function normalizeExistingImage(sourceFilename, outputFilename) {
     }
 }
 
-async function createTwelveBadgedImage(filename) {
+function toAbiParts(value) {
+    return String(value || '')
+        .split(/[^0-9]+/)
+        .filter(Boolean)
+        .slice(0, 3)
+        .map((n) => Number(n));
+}
+
+function getAbiMatchScore(requestedAbi, candidateAbi) {
+    const requested = toAbiParts(requestedAbi);
+    const candidate = toAbiParts(candidateAbi);
+    if (!requested.length || !candidate.length || requested[0] !== candidate[0]) return 0;
+    if (requested[1] == null || candidate[1] == null || requested[1] !== candidate[1]) return 1;
+    return requested[2] != null && candidate[2] != null && requested[2] === candidate[2] ? 3 : 2;
+}
+
+function getPluginAbiBadgeScore(plugin, requestedAbi) {
+    const versions = plugin.versions || plugin.Versions || [];
+    let score = 0;
+
+    for (const version of versions) {
+        score = Math.max(score, getAbiMatchScore(requestedAbi, version.targetAbi || version.TargetAbi || ''));
+        if (score === 3) return 3;
+    }
+
+    return score;
+}
+
+async function createAbiBadgedImage(filename, score) {
     const sourcePath = path.join(pluginDir, filename);
-    const outputPath = path.join(pluginDir12, filename);
+    const outputDir = path.join(pluginDir, agentLabel);
+    const outputPath = path.join(outputDir, filename);
+    const style = ABI_BADGE[score] || ABI_BADGE[0];
 
     try {
-        const badgeBuffer = await sharp(badgeAssetPath)
-            .resize(50, 50, { fit: 'fill' })
-            .png()
-            .toBuffer();
+        await fs.mkdir(outputDir, { recursive: true });
 
-        await sharp(sourcePath)
-            .composite([{ input: badgeBuffer, gravity: 'east' }])
+        if (!style.label) {
+            await sharp(sourcePath).toFile(outputPath);
+            return true;
+        }
+
+        const fontSize = 22;
+        const horizontalPadding = 12;
+        const height = 34;
+        const width = Math.max(34, style.label.length * 16 + horizontalPadding * 2);
+        const textX = Math.round(width / 2);
+        const textY = Math.round(height * 0.72);
+        const radius = Math.round(height / 2);
+
+        const badgeBuffer = Buffer.from(
+            `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" fill="${style.bg}"/><text x="${textX}" y="${textY}" text-anchor="middle" font-size="${fontSize}" font-family="DejaVu Sans, Noto Sans, sans-serif" fill="${style.fg}">${style.label}</text></svg>`
+        );
+        const image = sharp(sourcePath);
+        const metadata = await image.metadata();
+        const badgeMetadata = await sharp(badgeBuffer).metadata();
+        const leftPos = (metadata.width - badgeMetadata.width) - 10;
+        const topPos = ((metadata.height - badgeMetadata.height) / 2) - 60;
+
+        await image
+            .composite([{ 
+                input: badgeBuffer, 
+                top: Math.round(topPos), 
+                left: Math.round(leftPos) 
+            }])
             .toFile(outputPath);
 
         return true;
     } catch (err) {
-        logger.error(`error creating 12.0 badge image for ${filename}: ${err.message}`);
+        logger.error(`error creating ABI badge image for ${filename}: ${err.message}`);
         return false;
     }
 }
@@ -514,87 +569,82 @@ function sanitizePlugins(plugins) {
     });
 }
 
+const IMAGE_EXT = '.webp';
+
+function getBadgeBuffer(score) {
+    const style = ABI_BADGE[score] || ABI_BADGE[0];
+    if (!style.label) return null;
+
+    const fontSize = 22;
+    const horizontalPadding = 12;
+    const height = 34;
+    const width = Math.max(34, style.label.length * 16 + horizontalPadding * 2);
+    const textX = Math.round(width / 2);
+    const textY = Math.round(height * 0.72);
+    const radius = Math.round(height / 2);
+
+    return Buffer.from(
+        `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="${width}" height="${height}" rx="${radius}" fill="${style.bg}"/><text x="${textX}" y="${textY}" text-anchor="middle" font-size="${fontSize}" font-family="DejaVu Sans, Noto Sans, sans-serif" fill="${style.fg}">${style.label}</text></svg>`
+    );
+}
+
+async function processSinglePass(url, filename, abiBadgeScore) {
+    try {
+        const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
+        if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+        const inputBuffer = Buffer.from(await res.arrayBuffer());
+        let pipeline = sharp(inputBuffer)
+            .resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' });
+        const badgeBuffer = getBadgeBuffer(abiBadgeScore);
+        if (badgeBuffer) {
+            const badgeMetadata = await sharp(badgeBuffer).metadata();
+            const leftPos = (NORMALIZED_WIDTH - badgeMetadata.width) - 10;
+            const topPos = ((NORMALIZED_HEIGHT - badgeMetadata.height) / 2) - 60;
+
+            pipeline = pipeline.composite([{ 
+                input: badgeBuffer, 
+                top: Math.round(topPos), 
+                left: Math.round(leftPos) 
+            }]);
+        }
+        const outputDir = path.join(pluginDir, agentLabel);
+        await fs.mkdir(outputDir, { recursive: true });
+        
+        await pipeline
+            .webp({ quality: 82, effort: 6 })
+            .toFile(path.join(outputDir, filename));
+
+        return true;
+    } catch (err) {
+        logger.error(`Error processing image ${url}: ${err.message}`);
+        return false;
+    }
+}
 async function processImages(pluginData) {
     logger.info(`processing images for ${pluginData.length} plugins`);
 
-    for (const plugin of pluginData) {
-        const shouldBadgeForTwelve = Boolean(isTwelveRequest && plugin._metaHasExactTwelveAbi === true);
-
-        if (!plugin.imageUrl) {
+    await Promise.all(pluginData.map(async (plugin) => {
+        if (!plugin.imageUrl || plugin.imageUrl === fallbackImageUrl) {
             plugin.imageUrl = fallbackImageUrl;
-            delete plugin._metaHasExactTwelveAbi;
-            continue;
+            return;
         }
 
-        if (plugin.imageUrl) {
-            let pluginId = getPluginId(plugin);
-            if (!pluginId) {
-                pluginId = hashString(plugin.imageUrl);
+        const abiBadgeScore = getPluginAbiBadgeScore(plugin, sanitizedAgentVersion);
+        let pluginId = getPluginId(plugin) || hashString(plugin.imageUrl);
+        const sanitizedId = sanitizeImageName(pluginId);
+        const filename = `${sanitizedId}${IMAGE_EXT}`;
+        const exists = await imageExists(path.join(agentLabel, filename));
+
+        if (regenImages || !exists) {
+            const success = await processSinglePass(plugin.imageUrl, filename, abiBadgeScore);
+            if (!success) {
+                plugin.imageUrl = fallbackImageUrl;
+                return;
             }
-            const rawId = String(pluginId);
-            const legacyExt = path.extname(new URL(plugin.imageUrl).pathname) || '.png';
-            const legacyFilename = `${rawId}${legacyExt}`;
-            const sanitizedId = sanitizeImageName(rawId);
-            const filename = `${sanitizedId}.jpg`;
-            const shouldDownload = regenImages || !(await imageExists(filename));
-
-            if (filename !== legacyFilename && !shouldDownload && await imageExists(legacyFilename)) {
-                try {
-                    await fs.rename(path.join(pluginDir, legacyFilename), path.join(pluginDir, filename));
-                } catch (err) {
-                    logger.error(`error renaming image ${legacyFilename}: ${err.message}`);
-                }
-            }
-
-            if (shouldDownload) {
-                const success = await downloadImage(plugin.imageUrl, filename);
-                if (!success) {
-                    const fallbackCandidates = [
-                        `${sanitizedId}${legacyExt}`,
-                        `${rawId}${legacyExt}`,
-                        legacyFilename,
-                        `${sanitizedId}.png`,
-                        `${rawId}.png`,
-                        `${sanitizedId}.webp`,
-                        `${rawId}.webp`,
-                        `${sanitizedId}.jpeg`,
-                        `${rawId}.jpeg`,
-                        `${sanitizedId}.jpg`,
-                        `${rawId}.jpg`
-                    ];
-
-                    let normalizedFromExisting = false;
-                    for (const candidate of fallbackCandidates) {
-                        if (!(await imageExists(candidate))) {
-                            continue;
-                        }
-                        if (await normalizeExistingImage(candidate, filename)) {
-                            normalizedFromExisting = true;
-                            break;
-                        }
-                    }
-
-                    if (!normalizedFromExisting) {
-                        plugin.imageUrl = fallbackImageUrl;
-                        delete plugin._metaHasExactTwelveAbi;
-                        continue;
-                    }
-                }
-            }
-            if (shouldDownload || await imageExists(filename)) {
-                plugin.imageUrl = imageBaseUrl + filename;
-
-                if (shouldBadgeForTwelve) {
-                    const created = await createTwelveBadgedImage(filename);
-                    if (created) {
-                        plugin.imageUrl = imageBaseUrl + '12/' + filename;
-                    }
-                }
-            }
-
-            delete plugin._metaHasExactTwelveAbi;
         }
-    }
+
+        plugin.imageUrl = imageBaseUrl + `${agentLabel}/${filename}`;
+    }));
 }
 
 async function writeManifest(manifestJson, outputFile, pluginCount){
@@ -681,7 +731,7 @@ async function processList(sourceFile, outputFile) {
 async function main() {
     try{await fs.mkdir('./plugins/')}catch(err){}
     try{await fs.mkdir(pluginDir, { recursive: true })}catch(err){}
-    try{await fs.mkdir(pluginDir12, { recursive: true })}catch(err){}
+    try{await fs.mkdir(path.join(pluginDir, agentLabel), { recursive: true })}catch(err){}
     
     initializeWorkerPool();
     initializeManifestWorkerPool();
