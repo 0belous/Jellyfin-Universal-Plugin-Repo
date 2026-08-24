@@ -7,7 +7,7 @@ const LATEST_RELEASE_ABI = '10.11';
 const NORMALIZED_WIDTH = 576;
 const NORMALIZED_HEIGHT = 324;
 const IMAGE_EXT = '.webp';
-const fallbackImageUrl = 'https://dl.obelous.dev/public/upr-missing.png';
+const fallbackImageUrl = 'https://raw.githubusercontent.com/0belous/Jellyfin-Universal-Plugin-Repo/refs/heads/main/assets/upr-missing.png';
 const imageBaseUrl = 'https://obelo.us/plugins/images/';
 const pluginDir = path.join('./plugins', 'images');
 
@@ -175,7 +175,7 @@ async function main() {
         overview: `Generated: ${timestamp}`,
         owner: 'Obelous',
         category: 'Miscellaneous',
-        imageUrl: 'https://dl.obelous.dev/public/upr-main.png',
+        imageUrl: 'https://raw.githubusercontent.com/0belous/Jellyfin-Universal-Plugin-Repo/refs/heads/main/assets/upr-main.png',
         _metaSourceUrl: 'internal',
         versions: [{ version: '0.0.0', targetAbi: sanitizedAgentVersion, timestamp }]
     });
