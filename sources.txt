@@ -166,6 +166,7 @@ https://raw.githubusercontent.com/vosmiic/jellyfin-ani-sync/master/manifest.json
 https://raw.githubusercontent.com/waynedillon220/Jellyfin-Chat/main/manifest.json | https://github.com/waynedillon220/Jellyfin-Chat | *.*
 https://raw.githubusercontent.com/webbster64/jellyfin-plugin-AnimeMultiSource/main/manifest.json | https://github.com/webbster64/jellyfin-plugin-AnimeMultiSource/ | *.*
 https://raw.githubusercontent.com/xiaolee-lab/jellyfin-plugin-strmposter/refs/heads/main/manifest.json | https://github.com/xiaolee-lab/jellyfin-plugin-strmposter | *.*
+https://raw.githubusercontent.com/yonie/jellyfin-plugin-autoplaylist/main/manifest.json | https://github.com/yonie/jellyfin-plugin-autoplaylist | 10.11
 https://raw.githubusercontent.com/ZL154/AchievementBadges_for_Jellyfin/main/manifest.json | https://github.com/ZL154/AchievementBadges_for_Jellyfin | *.*
 https://raw.githubusercontent.com/ZL154/jellyfin-plugin-startrack/main/manifest.json | https://github.com/ZL154/jellyfin-plugin-startrack | *.*
 https://raw.githubusercontent.com/ZL154/jellyfin-projectionist/main/manifest.json | https://github.com/ZL154/jellyfin-projectionist | *.*
