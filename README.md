@@ -90,13 +90,13 @@ The update script uses the third field in each `sources.txt` entry to select com
 Each source entry uses this format:
 
 ```text
-manifest URL | repository URL | Jellyfin version constraint
+manifest URL | repository URL
 ```
 
 For example:
 
 ```text
-https://example.com/manifest.json | https://github.com/example/plugin | 10.11,12.0
+https://example.com/manifest.json | https://github.com/example/plugin
 ```
 
 When you add a source:

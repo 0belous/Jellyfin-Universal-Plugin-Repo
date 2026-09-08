@@ -33,10 +33,23 @@ const logger = {
 
 const hashString = (s) => crypto.createHash('md5').update(s).digest('hex');
 const isBlockedHost = (u) => !u || /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.0\.0\.0)/i.test(new URL(u).hostname);
-const isVersionMatch = (t, c) => !c || c === '.' || c === '*.*' || c.split(',').some(p => new RegExp(`^${p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`).test(t) || t.startsWith(p.replace(/\*+$/, '')));
 const matchesAbiPrefix = (a, p) => a && p && (a === p.replace(/\.\*$/, '') || a.startsWith(p.replace(/\.\*$/, '') + '.') || a.startsWith(p.replace(/\.\*$/, '') + '-') || a.startsWith(p.replace(/\.\*$/, '')));
 const pluginSupportsAnyAbi = (p, prefixes) => (p.versions || p.Versions || []).some(v => prefixes.some(pre => matchesAbiPrefix(String(v.targetAbi || v.TargetAbi || ''), pre)));
 const toAbiParts = (v) => String(v || '').split(/[^0-9]+/).filter(Boolean).slice(0, 3).map(Number);
+
+function getCompatibleAbiPrefixes(ver) {
+    const parts = toAbiParts(ver);
+    const maj = parts[0] ?? 10;
+    const min = parts[1] ?? 11;
+
+    if (maj >= 12) {
+        if (maj === 12 && min === 0) return ['12.0', '10.11', '10.10'];
+        return min > 0 ? [`${maj}.${min}`, `${maj}.${min - 1}`, `${maj}.${min - 2}`] : [`${maj}.0`, `${maj - 1}.0`, '10.11'];
+    }
+    return [`10.${min}`, `10.${Math.max(0, min - 1)}`, `10.${Math.max(0, min - 2)}`];
+}
+
+const activeAbiPrefixes = getCompatibleAbiPrefixes(/^\d+(\.\d+)+/.test(sanitizedAgentVersion) ? sanitizedAgentVersion : LATEST_RELEASE_ABI);
 
 function getAbiMatchScore(req, cand) {
     const r = toAbiParts(req), c = toAbiParts(cand);
@@ -102,26 +115,25 @@ async function fetchSource(url) {
 
 async function getSources(file) {
     const lines = (await fs.readFile(file, 'utf8')).split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('#'));
-    const filtered = lines.map(l => { const [m, g, t] = l.split('|').map(s => s.trim()); return { m, g, t: t || '.' }; }).filter(s => /^12/.test(sanitizedAgentVersion) || isVersionMatch(sanitizedAgentVersion, s.t));
-    const results = await Promise.allSettled(filtered.map(s => fetchSource(s.m)));
+    const sources = lines.map(l => { const [m, g] = l.split('|').map(s => s.trim()); return { m, g }; });
+    const results = await Promise.allSettled(sources.map(s => fetchSource(s.m)));
     const plugins = [];
 
     results.forEach((r, i) => {
         if (r.status === 'fulfilled') {
             (Array.isArray(r.value) ? r.value : (r.value.plugins || [])).forEach(p => {
-                if (p.guid || p.Guid) {
-                    if (/^12/.test(sanitizedAgentVersion) && !pluginSupportsAnyAbi(p, ['12.*', '10.11', '10.10'])) return;
-                    p._metaSourceUrl = filtered[i].m;
-                    p._metaGithubUrl = filtered[i].g;
+                if ((p.guid || p.Guid) && pluginSupportsAnyAbi(p, activeAbiPrefixes)) {
+                    p._metaSourceUrl = sources[i].m;
+                    p._metaGithubUrl = sources[i].g;
                     plugins.push(p);
                 }
             });
         } else {
-            logger.error(`fetch failed: ${filtered[i].m} (${r.reason.message})`);
+            logger.error(`fetch failed: ${sources[i].m} (${r.reason.message})`);
         }
     });
 
-    return { plugins, sourceCount: filtered.length };
+    return { plugins, sourceCount: sources.length };
 }
 
 async function processSinglePass(url, filename, score) {
@@ -138,7 +150,7 @@ async function processSinglePass(url, filename, score) {
         }
         const dir = path.join(pluginDir, agentLabel);
         await fs.mkdir(dir, { recursive: true });
-        await pipeline.webp({ quality: 82, effort: 6 }).toFile(path.join(dir, filename));
+        await pipeline.webp({ quality: 82, effort: 4 }).toFile(path.join(dir, filename));
         return true;
     } catch { return false; }
 }
