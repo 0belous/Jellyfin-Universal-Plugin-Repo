@@ -1,6 +1,6 @@
 # Jellyfin Universal Plugin Repository
 
-Jellyfin Universal Repository combines plugin manifests from multiple repositories and serves a manifest for Jellyfin clients.
+Jellyfin Universal Repository combines plugin manifests from multiple repositories and serves a single universal manifest.
 
 ## Add the catalogue to Jellyfin
 
