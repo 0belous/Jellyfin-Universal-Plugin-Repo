@@ -22,10 +22,12 @@ The old GitHub-hosted manifest is deprecated. See [deprecation.md](deprecation.m
 
 ## Jellyfin compatibility
 
-Look for the single double and triple check marks to see how many of the X.Y.Z digits of your jellyfin version a plugin says it supports.
-Generally a double checkmark is great.
-Triple checkmark means the developer tested their plugin on your exact jellyfin version. 
-Some plugins may not have any checkmark and still work, consult the original documentation to find out if this is the case.
+The catalogue uses checkmarks to indicate how many digits of your Jellyfin server's version (`X.Y.Z`) match the version declared by the plugin author:
+
+* **Triple checkmark (`✓✓✓`)**: The plugin author tested and verified the plugin against your exact Jellyfin version (`X.Y.Z`).
+* **Double checkmark (`✓✓`)**: The plugin supports your major and minor version (`X.Y`). Plugins with this rating typically work without issues.
+* **Single checkmark (`✓`)**: The plugin author declared support only for your major version (`X`).
+* **No checkmark**: The plugin does not declare support for your Jellyfin version. The plugin might still function, but review the upstream plugin documentation to confirm compatibility before installing it.
 
 ## How the catalogue works
 
