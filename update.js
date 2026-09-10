@@ -144,8 +144,10 @@ async function processSinglePass(url, filename, score) {
         let pipeline = sharp(Buffer.from(await res.arrayBuffer())).resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' });
         const style = ABI_BADGE[score];
         if (style?.label) {
-            const w = Math.max(34, style.label.length * 16 + 24);
-            const badge = Buffer.from(`<svg width="${w}" height="34" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="${w}" height="34" rx="17" fill="${style.bg}"/><text x="${w / 2}" y="24.48" text-anchor="middle" font-size="22" font-family="DejaVu Sans, sans-serif" fill="${style.fg}">${style.label}</text></svg>`);
+            const count = style.label.length;
+            const w = Math.max(34, count * 16 + 24);
+            const marks = Array.from({ length: count }, (_, i) => `<path d="M${w / 2 + (i - (count - 1) / 2) * 16 - 6} 17l4 4l8-9" fill="none" stroke="${style.fg}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+            const badge = Buffer.from(`<svg width="${w}" height="34" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="34" rx="17" fill="${style.bg}"/>${marks}</svg>`);
             pipeline = pipeline.composite([{ input: badge, top: Math.round((NORMALIZED_HEIGHT - 34) / 2 - 60), left: Math.round(NORMALIZED_WIDTH - w - 10) }]);
         }
         const dir = path.join(pluginDir, agentLabel);
