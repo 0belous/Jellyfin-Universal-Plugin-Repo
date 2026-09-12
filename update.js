@@ -80,6 +80,9 @@ function transformPlugins(plugins, genTime) {
     return plugins.map(p => {
         const guid = (p.guid || p.Guid || '').toLowerCase();
         const { Guid, ...rest } = p;
+        const badge = ABI_BADGE[getPluginAbiBadgeScore(p, sanitizedAgentVersion)]?.label;
+        if (badge && (rest.name || rest.Name)) rest[rest.name ? 'name' : 'Name'] += ` [${badge}]`;
+
         if (rest.versions) {
             rest.versions.forEach(v => {
                 if (v.dependencies) v.dependencies = v.dependencies.filter(d => d.toLowerCase() !== guid);

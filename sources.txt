@@ -182,7 +182,6 @@ https://raw.githubusercontent.com/TheAceOfficials/BetterPoster-for-Jellyfin/main
 https://raw.githubusercontent.com/TheAnonymous/MediaUploader/refs/heads/main/manifest.json | https://github.com/TheAnonymous/MediaUploader
 https://raw.githubusercontent.com/TheIntroDB/jellyfin-plugin/main/manifest.json | https://github.com/TheIntroDB/jellyfin-plugin
 https://raw.githubusercontent.com/thenchev/jellyfin-show-tracker-plugin/main/manifest.json | https://github.com/thenchev/jellyfin-show-tracker-plugin
-https://raw.githubusercontent.com/ThePornDatabase/Jellyfin.Plugin.ThePornDB/main/manifest.json | https://github.com/ThePornDatabase/Jellyfin.Plugin.ThePornDB
 https://raw.githubusercontent.com/TheXaman/jellyfin-plugin-languageTags/main/manifest.json | https://github.com/TheXaman/jellyfin-plugin-languageTags
 https://raw.githubusercontent.com/thisispivi/JellyfinSleepGuard/main/manifest.json | https://github.com/thisispivi/JellyfinSleepGuard
 https://raw.githubusercontent.com/Thomas05000005/MaintenanceDeluxe-jellyfin-plugin/main/manifest.json | https://github.com/Thomas05000005/MaintenanceDeluxe-jellyfin-plugin
