@@ -65,10 +65,7 @@ const prune = async () => {
     for (const [id, seen] of knownAgents) {
         if (new Date(seen).getTime() < cutoff) {
             knownAgents.delete(id);
-            await Promise.allSettled([
-                fs.rm(path.join(PLUGINS_DIR, `manifest.${id}.json`), { force: true }),
-                fs.rm(path.join(IMAGES_DIR, id), { recursive: true, force: true })
-            ]);
+            await fs.rm(path.join(PLUGINS_DIR, `manifest.${id}.json`), { force: true });
         }
     }
     await fs.writeFile(KNOWN_AGENTS_FILE, JSON.stringify(Object.fromEntries(knownAgents), null, 2));
