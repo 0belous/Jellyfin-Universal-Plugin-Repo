@@ -19,12 +19,7 @@ const sanitizedAgentVersion = agentArg.replace(/[^a-zA-Z0-9._-]/g, '');
 const agentLabel = agentArg.replace(/[^a-zA-Z0-9._-]/g, '') || 'universal';
 const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion) ? sanitizedAgentVersion : `Jellyfin-Server/${sanitizedAgentVersion}`;
 
-const ABI_BADGE = {
-    0: { label: '', bg: '', fg: '' },
-    1: { label: '✓', bg: '#1d4ed8', fg: '#ffffff' },
-    2: { label: '✓✓', bg: '#15803d', fg: '#ffffff' },
-    3: { label: '✓✓✓', bg: '#15803d', fg: '#ffffff' }
-};
+const CHECKMARKS = ['', '✓', '✓✓', '✓✓✓'];
 
 const logger = {
     info: (m) => console.log(`[${agentLabel}] ${m}`),
@@ -80,7 +75,7 @@ function transformPlugins(plugins, genTime) {
     return plugins.map(p => {
         const guid = (p.guid || p.Guid || '').toLowerCase();
         const { Guid, ...rest } = p;
-        const badge = ABI_BADGE[getPluginAbiBadgeScore(p, sanitizedAgentVersion)]?.label;
+        const badge = CHECKMARKS[getPluginAbiBadgeScore(p, sanitizedAgentVersion)];
         if (badge && (rest.name || rest.Name)) rest[rest.name ? 'name' : 'Name'] += ` [${badge}]`;
 
         if (rest.versions) {
@@ -139,23 +134,15 @@ async function getSources(file) {
     return { plugins, sourceCount: sources.length };
 }
 
-async function processSinglePass(url, filename, score) {
+async function processSinglePass(url, filename) {
     try {
         if (isBlockedHost(url)) return false;
         const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
         if (!res.ok) throw new Error();
-        let pipeline = sharp(Buffer.from(await res.arrayBuffer())).resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' });
-        const style = ABI_BADGE[score];
-        if (style?.label) {
-            const count = style.label.length;
-            const w = Math.max(34, count * 16 + 24);
-            const marks = Array.from({ length: count }, (_, i) => `<path d="M${w / 2 + (i - (count - 1) / 2) * 16 - 6} 17l4 4l8-9" fill="none" stroke="${style.fg}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
-            const badge = Buffer.from(`<svg width="${w}" height="34" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="34" rx="17" fill="${style.bg}"/>${marks}</svg>`);
-            pipeline = pipeline.composite([{ input: badge, top: Math.round((NORMALIZED_HEIGHT - 34) / 2 - 60), left: Math.round(NORMALIZED_WIDTH - w - 10) }]);
-        }
-        const dir = path.join(pluginDir, agentLabel);
-        await fs.mkdir(dir, { recursive: true });
-        await pipeline.webp({ quality: 82, effort: 4 }).toFile(path.join(dir, filename));
+        await sharp(Buffer.from(await res.arrayBuffer()))
+            .resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' })
+            .webp({ quality: 82, effort: 4 })
+            .toFile(path.join(pluginDir, filename));
         return true;
     } catch { return false; }
 }
@@ -163,22 +150,21 @@ async function processSinglePass(url, filename, score) {
 async function processImages(plugins) {
     logger.info(`processing images for ${plugins.length} plugins`);
     await Promise.all(plugins.map(async (p) => {
-        const score = getPluginAbiBadgeScore(p, sanitizedAgentVersion);
         const id = p.id || p.Id || p.pluginId || p.name || hashString(p.imageUrl || fallbackImageUrl);
         const fname = `${String(id).replace(/\s+/g, '')}${IMAGE_EXT}`;
-        const exists = await fs.access(path.join(pluginDir, agentLabel, fname)).then(() => true).catch(() => false);
+        const exists = await fs.access(path.join(pluginDir, fname)).then(() => true).catch(() => false);
 
         if (regenImages || !exists) {
-            if (!(await processSinglePass(p.imageUrl || fallbackImageUrl, fname, score))) {
-                await processSinglePass(fallbackImageUrl, fname, score);
+            if (!(await processSinglePass(p.imageUrl || fallbackImageUrl, fname))) {
+                await processSinglePass(fallbackImageUrl, fname);
             }
         }
-        p.imageUrl = `${imageBaseUrl}${agentLabel}/${fname}`;
+        p.imageUrl = `${imageBaseUrl}${fname}`;
     }));
 }
 
 async function main() {
-    await fs.mkdir(path.join(pluginDir, agentLabel), { recursive: true });
+    await fs.mkdir(pluginDir, { recursive: true });
     if (regenImages) await fs.readdir(pluginDir).then(files => Promise.all(files.map(f => fs.rm(path.join(pluginDir, f), { recursive: true, force: true }))));
     
     const { plugins: fetched, sourceCount } = await getSources('sources.txt');
@@ -197,8 +183,8 @@ async function main() {
         versions: [{ version: '0.0.0', targetAbi: sanitizedAgentVersion, timestamp }]
     });
 
+    await processImages(fetched);
     const transformed = transformPlugins(fetched, timestamp.substring(11, 16) + ' UTC');
-    await processImages(transformed);
     
     const manifest = JSON.stringify(transformed, null, 2);
     const out = path.join('./plugins', `manifest.${agentLabel}.json`);
