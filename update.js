@@ -9,14 +9,15 @@ const NORMALIZED_HEIGHT = 324;
 const IMAGE_EXT = '.webp';
 const fallbackImageUrl = 'https://raw.githubusercontent.com/0belous/Jellyfin-Universal-Plugin-Repo/refs/heads/main/assets/upr-missing.png';
 const imageBaseUrl = 'https://obelo.us/plugins/images/';
-const pluginDir = path.join('./plugins', 'images');
+const pluginsDir = path.join(__dirname, 'plugins');
+const pluginDir = path.join(pluginsDir, 'images');
 
 const arg2 = (process.argv[2] || '').trim().toLowerCase();
 const arg3 = (process.argv[3] || '').trim();
 const regenImages = ['true', '1', 'yes'].includes(arg2);
 const agentArg = (['true', '1', 'yes', 'false', '0', 'no'].includes(arg2) ? arg3 : (process.argv[2] || arg3)) || 'universal';
 const sanitizedAgentVersion = agentArg.replace(/[^a-zA-Z0-9._-]/g, '');
-const agentLabel = agentArg.replace(/[^a-zA-Z0-9._-]/g, '') || 'universal';
+const agentLabel = sanitizedAgentVersion || 'universal';
 const defaultUserAgent = /^jellyfin-server\//i.test(sanitizedAgentVersion) ? sanitizedAgentVersion : `Jellyfin-Server/${sanitizedAgentVersion}`;
 
 const CHECKMARKS = ['', '✓', '✓✓', '✓✓✓'];
@@ -106,7 +107,7 @@ function transformPlugins(plugins, genTime) {
 
 async function fetchSource(url) {
     if (isBlockedHost(url)) throw new Error('Blocked host');
-    const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
+    const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent }, signal: AbortSignal.timeout(10000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
 }
@@ -119,7 +120,7 @@ async function getSources(file) {
 
     results.forEach((r, i) => {
         if (r.status === 'fulfilled') {
-            (Array.isArray(r.value) ? r.value : (r.value.plugins || [])).forEach(p => {
+            (Array.isArray(r.value) ? r.value : (r.value?.plugins || [])).forEach(p => {
                 if ((p.guid || p.Guid) && pluginSupportsAnyAbi(p, activeAbiPrefixes)) {
                     p._metaSourceUrl = sources[i].m;
                     p._metaGithubUrl = sources[i].g;
@@ -137,8 +138,8 @@ async function getSources(file) {
 async function processSinglePass(url, filename) {
     try {
         if (isBlockedHost(url)) return false;
-        const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent } });
-        if (!res.ok) throw new Error();
+        const res = await fetch(url, { headers: { 'User-Agent': defaultUserAgent }, signal: AbortSignal.timeout(10000) });
+        if (!res.ok) return false;
         await sharp(Buffer.from(await res.arrayBuffer()))
             .resize(NORMALIZED_WIDTH, NORMALIZED_HEIGHT, { fit: 'cover', position: 'centre' })
             .webp({ quality: 82, effort: 4 })
@@ -149,26 +150,29 @@ async function processSinglePass(url, filename) {
 
 async function processImages(plugins) {
     logger.info(`processing images for ${plugins.length} plugins`);
-    await Promise.all(plugins.map(async (p) => {
-        const id = p.id || p.Id || p.pluginId || p.name || hashString(p.imageUrl || fallbackImageUrl);
-        const fname = `${String(id).replace(/\s+/g, '')}${IMAGE_EXT}`;
-        const exists = await fs.access(path.join(pluginDir, fname)).then(() => true).catch(() => false);
+    const concurrency = 6;
+    for (let i = 0; i < plugins.length; i += concurrency) {
+        await Promise.all(plugins.slice(i, i + concurrency).map(async (p) => {
+            const id = p.id || p.Id || p.pluginId || p.name || hashString(p.imageUrl || fallbackImageUrl);
+            const fname = `${String(id).replace(/\s+/g, '')}${IMAGE_EXT}`;
+            const exists = await fs.access(path.join(pluginDir, fname)).then(() => true).catch(() => false);
 
-        if (regenImages || !exists) {
-            if (!(await processSinglePass(p.imageUrl || fallbackImageUrl, fname))) {
-                await processSinglePass(fallbackImageUrl, fname);
+            if (regenImages || !exists) {
+                if (!(await processSinglePass(p.imageUrl || fallbackImageUrl, fname))) {
+                    await processSinglePass(fallbackImageUrl, fname);
+                }
             }
-        }
-        p.imageUrl = `${imageBaseUrl}${fname}`;
-    }));
+            p.imageUrl = `${imageBaseUrl}${fname}`;
+        }));
+    }
 }
 
 async function main() {
     await fs.mkdir(pluginDir, { recursive: true });
     if (regenImages) await fs.readdir(pluginDir).then(files => Promise.all(files.map(f => fs.rm(path.join(pluginDir, f), { recursive: true, force: true }))));
     
-    const { plugins: fetched, sourceCount } = await getSources('sources.txt');
-    if (!fetched.length) return;
+    const { plugins: fetched, sourceCount } = await getSources(path.join(__dirname, 'sources.txt'));
+    if (!fetched.length) throw new Error('No plugins matched target ABI');
 
     const timestamp = new Date().toISOString();
     fetched.unshift({
@@ -187,10 +191,15 @@ async function main() {
     const transformed = transformPlugins(fetched, timestamp.substring(11, 16) + ' UTC');
     
     const manifest = JSON.stringify(transformed, null, 2);
-    const out = path.join('./plugins', `manifest.${agentLabel}.json`);
-    await fs.writeFile(out, manifest);
-    if (agentLabel === 'universal') await fs.writeFile(path.join('./plugins', 'manifest.json'), manifest);
+    const out = path.join(pluginsDir, `manifest.${agentLabel}.json`);
+    const tmp = `${out}.${Date.now()}.tmp`;
+    await fs.writeFile(tmp, manifest);
+    await fs.rename(tmp, out);
+    if (agentLabel === 'universal') await fs.writeFile(path.join(pluginsDir, 'manifest.json'), manifest);
     logger.info(`manifest written: ${out} (${transformed.length} plugins)`);
 }
 
-main().catch(e => logger.error(e.message));
+main().catch(e => {
+    logger.error(e.message);
+    process.exit(1);
+});

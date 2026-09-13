@@ -41,7 +41,7 @@ const normalizeUA = (ua) => ua?.match(/^jellyfin(?:-server)?\/([^\s;]+)/i)?.[1]?
 const runUpdate = (id, regen = false) => {
     if (updateInProgress.has(id)) return;
     updateInProgress.add(id);
-    const proc = spawn(process.execPath, [path.join(__dirname, 'update.js'), regen, id], { cwd: __dirname });
+    const proc = spawn(process.execPath, [path.join(__dirname, 'update.js'), String(regen), id], { cwd: __dirname });
     
     proc.stdout.on('data', d => {
         const line = d.toString().split('\n').find(l => l.includes(']'));
@@ -51,11 +51,16 @@ const runUpdate = (id, regen = false) => {
         }
     });
 
+    proc.stderr.on('data', d => setStatus(id, `err: ${d.toString().trim()}`));
+    proc.on('error', () => updateInProgress.delete(id));
+
     proc.on('close', (code) => {
         updateInProgress.delete(id);
         if (code === 0) {
             knownAgents.set(id, new Date().toISOString());
             fs.writeFile(KNOWN_AGENTS_FILE, JSON.stringify(Object.fromEntries(knownAgents), null, 2));
+        } else {
+            fs.rm(path.join(PLUGINS_DIR, `manifest.${id}.json`), { force: true }).catch(() => {});
         }
     });
 };
@@ -97,7 +102,7 @@ const start = async () => {
             if (!id) return res.writeHead(302, { Location: REDIRECT_URL }).end();
             
             const manifestPath = path.join(PLUGINS_DIR, `manifest.${id}.json`);
-            const exists = await fs.access(manifestPath).then(() => true).catch(() => false);
+            const exists = await fs.stat(manifestPath).then(s => s.size > 2).catch(() => false);
             
             if (exists) return serve(res, manifestPath, 'application/json');
             
