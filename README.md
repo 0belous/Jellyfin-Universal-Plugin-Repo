@@ -33,7 +33,7 @@ To pin a frozen manifest:
 3. Pin the manifest in your declarative configuration by linking to the raw file at a specific Git commit hash:
 
 ```text
-https://raw.githubusercontent.com/0belous/Jellyfin-Universal-Plugin-Repo/<COMMIT_HASH>/<MANIFEST_FILE>.json
+https://raw.githubusercontent.com/0belous/upr-static/<COMMIT_HASH>/<MANIFEST_FILE>.json
 ```
 
 Pinning to a specific commit hash ensures that the manifest contents and checksum remain immutable until you decide to update it.
