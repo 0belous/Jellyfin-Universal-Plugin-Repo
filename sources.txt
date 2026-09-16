@@ -138,6 +138,7 @@ https://raw.githubusercontent.com/luall0/jellyfin-luall0-plugins/refs/heads/main
 https://raw.githubusercontent.com/Marnalas/jellyfin-subsync/HEAD/manifest.json | https://github.com/Marnalas/jellyfin-subsync
 https://raw.githubusercontent.com/metatube-community/jellyfin-plugin-metatube/dist/manifest.json | https://github.com/metatube-community/jellyfin-plugin-metatube
 https://raw.githubusercontent.com/MFerretti27/StudioHubs/main/manifest.json | https://github.com/MFerretti27/StudioHubs
+https://raw.githubusercontent.com/mihaif7/jellyfin-plugin-update-notifier/main/manifest.json | https://github.com/mihaif7/jellyfin-plugin-update-notifier
 https://raw.githubusercontent.com/MoazSalem/litefin-plugin/release/manifest.json | https://github.com/MoazSalem/litefin-plugin
 https://raw.githubusercontent.com/monxas/jellyfin-share-plugin/main/manifest.json | https://github.com/monxas/jellyfin-share-plugin
 https://raw.githubusercontent.com/Moonfin-Client/Plugin/refs/heads/master/manifest.json | https://github.com/Moonfin-Client/Plugin
@@ -178,6 +179,8 @@ https://raw.githubusercontent.com/shemanaev/jellyfin-plugin-repo/master/manifest
 https://raw.githubusercontent.com/ShokoAnime/Shokofin/metadata/stable/manifest.json | https://github.com/ShokoAnime/Shokofin
 https://raw.githubusercontent.com/SiroxCW/Jellyfin-AniWorld-Downloader/main/manifest.json | https://github.com/SiroxCW/Jellyfin-AniWorld-Downloader
 https://raw.githubusercontent.com/SloMR/jellyfin-plugin-dedupe-continue-watching/main/manifest.json | https://github.com/SloMR/jellyfin-plugin-dedupe-continue-watching
+https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/manifest.json | https://github.com/spkesDE/jellyfin-featured-plugin
+https://raw.githubusercontent.com/spkesDE/jellyfin-media-preview-plugin/main/manifest.json | https://github.com/spkesDE/jellyfin-media-preview-plugin
 https://raw.githubusercontent.com/storm1er/jellyfin-plugin-awesome-library-cleaner/refs/heads/main/manifest.json | https://github.com/storm1er/jellyfin-plugin-awesome-library-cleaner
 https://raw.githubusercontent.com/streamyfin/jellyfin-plugin-streamyfin/main/manifest.json | https://github.com/streamyfin/jellyfin-plugin-streamyfin
 https://raw.githubusercontent.com/superuser404notfound/jellyfin-plugin-language-aware-images/main/manifest.json | https://github.com/superuser404notfound/jellyfin-plugin-language-aware-images
