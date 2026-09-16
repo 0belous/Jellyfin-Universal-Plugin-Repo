@@ -109,7 +109,11 @@ https://raw.githubusercontent.com/jon4hz/jellyfin-plugin-jellysleep/main/manifes
 https://raw.githubusercontent.com/jon4hz/jellyfin-plugin-jellysweep/main/manifest.json | https://github.com/jon4hz/jellyfin-plugin-jellysweep
 https://raw.githubusercontent.com/jonjonsson/plugin.jellyfin.acdb.manifest/main/manifest.json | https://github.com/jonjonsson/plugin.jellyfin.acdb.manifest
 https://raw.githubusercontent.com/jonschz/jellyfin-plugin-preventsleep/refs/heads/main/manifest.json | https://github.com/jonschz/jellyfin-plugin-preventsleep
+https://raw.githubusercontent.com/josdion/subbuzz/master/repo/jellyfin_10.8.json | https://github.com/josdion/subbuzz
+https://raw.githubusercontent.com/josdion/subbuzz/master/repo/jellyfin_10.9.json | https://github.com/josdion/subbuzz
+https://raw.githubusercontent.com/josdion/subbuzz/master/repo/jellyfin_10.10.json | https://github.com/josdion/subbuzz
 https://raw.githubusercontent.com/josdion/subbuzz/master/repo/jellyfin_10.11.json | https://github.com/josdion/subbuzz
+https://raw.githubusercontent.com/josdion/subbuzz/master/repo/jellyfin_12.json | https://github.com/josdion/subbuzz
 https://raw.githubusercontent.com/JPKribs/jellyfin-plugin-episodepostergenerator/master/manifest.json | https://github.com/JPKribs/jellyfin-plugin-episodepostergenerator
 https://raw.githubusercontent.com/JPKribs/jellyfin-plugin-serversync/master/manifest.json | https://github.com/JPKribs/jellyfin-plugin-serversync
 https://raw.githubusercontent.com/JPVenson/Jellyfin.BetterDefaultProfilePictures.Plugin/refs/heads/master/manifest.json | https://github.com/JPVenson/Jellyfin.BetterDefaultProfilePictures.Plugin
