@@ -24,11 +24,11 @@ The old GitHub-hosted manifest is deprecated. See [deprecation.md](deprecation.m
 
 The live endpoint at `https://obelo.us/upr` updates periodically as upstream plugins release changes. These updates modify the file contents and break static checksum verification (such as SHA-256 hashes used in Nix, Ansible, or GitOps pipelines).
 
-If you manage your infrastructure declaratively and require reproducible builds, use the frozen JSON manifests committed to the [`archives`](https://github.com/0belous/Jellyfin-Universal-Plugin-Repo/tree/archives) branch.
+If you manage your infrastructure declaratively and require reproducible builds, use the frozen JSON manifests committed to the [`static repo`](https://github.com/0belous/upr-static).
 
 To pin a frozen manifest:
 
-1. Navigate to the [`archives`](https://github.com/0belous/Jellyfin-Universal-Plugin-Repo/tree/archives) branch.
+1. Navigate to the [`static repo`](https://github.com/0belous/upr-static).
 2. Locate the manifest file matching your target Jellyfin version.
 3. Pin the manifest in your declarative configuration by linking to the raw file at a specific Git commit hash:
 
