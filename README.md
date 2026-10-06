@@ -2,12 +2,17 @@
 
 Jellyfin Universal Repository combines plugin manifests from multiple repositories and serves a single universal manifest.
 
+## Update:
+WHOIS is terminating my domain: obelo.us due to the fact that I am not a US citizen.
+
+Please update your manifest URL to: `https://obelous.dev/upr`
+
 ## Add the catalogue to Jellyfin
 
 Add this URL as a plugin repository in the Jellyfin administrator dashboard:
 
 ```text
-https://obelo.us/upr
+https://obelous.dev/upr
 ```
 
 To add the repository:
@@ -15,14 +20,14 @@ To add the repository:
 1. Sign in to the Jellyfin administrator dashboard.
 2. Open **Dashboard > Plugins > Repositories**.
 3. Remove an older Universal Plugin Repo URL, if you added one.
-4. Add `https://obelo.us/upr` as the repository URL.
+4. Add `https://obelous.dev/upr` as the repository URL.
 5. Save the repository and refresh the plugin catalogue.
 
 The old GitHub-hosted manifest is deprecated. See [deprecation.md](deprecation.md) for details.
 
 ## Use frozen manifests in declarative workflows
 
-The live endpoint at `https://obelo.us/upr` updates periodically as upstream plugins release changes. These updates modify the file contents and break static checksum verification (such as SHA-256 hashes used in Nix, Ansible, or GitOps pipelines).
+The live endpoint at `https://obelous.dev/upr` updates periodically as upstream plugins release changes. These updates modify the file contents and break static checksum verification (such as SHA-256 hashes used in Nix, Ansible, or GitOps pipelines).
 
 If you manage your infrastructure declaratively and require reproducible builds, use the frozen JSON manifests committed to the [`static repo`](https://github.com/0belous/upr-static).
 
