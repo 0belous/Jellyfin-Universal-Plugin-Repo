@@ -3,7 +3,7 @@
 Jellyfin Universal Repository combines plugin manifests from multiple repositories and serves a single universal manifest.
 
 ## Update:
-WHOIS is terminating my domain: obelo.us due to the fact that I am not a US citizen.
+Cloudflare is terminating my domain: obelo.us due to the fact that I am not a US citizen.
 
 Please update your manifest URL to: `https://obelous.dev/upr`
 
