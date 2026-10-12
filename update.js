@@ -8,7 +8,7 @@ const NORMALIZED_WIDTH = 576;
 const NORMALIZED_HEIGHT = 324;
 const IMAGE_EXT = '.webp';
 const fallbackImageUrl = 'https://raw.githubusercontent.com/0belous/Jellyfin-Universal-Plugin-Repo/refs/heads/main/assets/upr-missing.png';
-const imageBaseUrl = 'https://obelo.us/plugins/images/';
+const imageBaseUrl = 'https://obelo.dev/plugins/images/';
 const pluginsDir = path.join(__dirname, 'plugins');
 const pluginDir = path.join(pluginsDir, 'images');
 
