@@ -168,7 +168,6 @@ https://raw.githubusercontent.com/mihaif7/jellyfin-plugin-update-notifier/main/m
 https://raw.githubusercontent.com/mleem97/mleem-jellyfin/main/manifest.json | https://github.com/mleem97/mleem-jellyfin
 https://raw.githubusercontent.com/MoazSalem/litefin-plugin/release/manifest.json | https://github.com/MoazSalem/litefin-plugin
 https://raw.githubusercontent.com/monxas/jellyfin-share-plugin/main/manifest.json | https://github.com/monxas/jellyfin-share-plugin
-https://raw.githubusercontent.com/moodiness/jellyfin-plugin-siphon/main/manifest.json | https://github.com/moodiness/jellyfin-plugin-siphon
 https://raw.githubusercontent.com/Moonfin-Client/Plugin/refs/heads/master/manifest.json | https://github.com/Moonfin-Client/Plugin
 https://raw.githubusercontent.com/MorganKryze/jellyflare/main/manifest.json | https://github.com/MorganKryze/jellyflare
 https://raw.githubusercontent.com/mpash/jellyfin-anime-filler-skipper/main/manifest.json | http://github.com/mpash/jellyfin-anime-filler-skipper

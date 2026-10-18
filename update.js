@@ -29,33 +29,18 @@ const logger = {
 
 const hashString = (s) => crypto.createHash('md5').update(s).digest('hex');
 const isBlockedHost = (u) => !u || /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.0\.0\.0)/i.test(new URL(u).hostname);
-const matchesAbiPrefix = (a, p) => a && p && (a === p.replace(/\.\*$/, '') || a.startsWith(p.replace(/\.\*$/, '') + '.') || a.startsWith(p.replace(/\.\*$/, '') + '-') || a.startsWith(p.replace(/\.\*$/, '')));
-const pluginSupportsAnyAbi = (p, prefixes) => (p.versions || p.Versions || []).some(v => prefixes.some(pre => matchesAbiPrefix(String(v.targetAbi || v.TargetAbi || ''), pre)));
-const toAbiParts = (v) => String(v || '').split(/[^0-9]+/).filter(Boolean).slice(0, 3).map(Number);
 
-function getCompatibleAbiPrefixes(ver) {
-    const parts = toAbiParts(ver);
-    const maj = parts[0] ?? 10;
-    const min = parts[1] ?? 11;
+const toParts = (v) => String(v || '').replace(/^10\./, '').split(/[^0-9]+/).filter(Boolean).slice(0, 3).map(Number);
+const targetParts = toParts(/^\d+(\.\d+)+/.test(sanitizedAgentVersion) ? sanitizedAgentVersion : LATEST_RELEASE_ABI);
+const reqParts = toParts(/^\d+(\.\d+)+/.test(sanitizedAgentVersion) ? sanitizedAgentVersion : '');
 
-    if (maj >= 12) {
-        if (maj === 12 && min === 0) return ['12.0', '10.11', '10.10'];
-        return min > 0 ? [`${maj}.${min}`, `${maj}.${min - 1}`, `${maj}.${min - 2}`] : [`${maj}.0`, `${maj - 1}.0`, '10.11'];
-    }
-    return [`10.${min}`, `10.${Math.max(0, min - 1)}`, `10.${Math.max(0, min - 2)}`];
-}
-
-const activeAbiPrefixes = getCompatibleAbiPrefixes(/^\d+(\.\d+)+/.test(sanitizedAgentVersion) ? sanitizedAgentVersion : LATEST_RELEASE_ABI);
-
-function getAbiMatchScore(req, cand) {
-    const r = toAbiParts(req), c = toAbiParts(cand);
-    if (!r.length || !c.length || r[0] !== c[0]) return 0;
-    if (r[1] == null || c[1] == null || r[1] !== c[1]) return 1;
+function abiScore(req, cand) {
+    const r = req.length ? req : toParts(req), c = toParts(cand);
+    if (!r.length || !c.length) return 0;
+    const diff = r[0] - c[0];
+    if (diff < 0 || diff > 2) return 0; // backward compatible across N, N-1, N-2
+    if (diff > 0 || r[1] == null || c[1] == null || r[1] !== c[1]) return 1;
     return r[2] != null && c[2] != null && r[2] === c[2] ? 3 : 2;
-}
-
-function getPluginAbiBadgeScore(p, req) {
-    return (p.versions || p.Versions || []).reduce((s, v) => Math.max(s, getAbiMatchScore(req, v.targetAbi || v.TargetAbi || '')), 0);
 }
 
 function findGithubUrl(obj) {
@@ -76,7 +61,8 @@ function transformPlugins(plugins, genTime) {
     return plugins.map(p => {
         const guid = (p.guid || p.Guid || '').toLowerCase();
         const { Guid, ...rest } = p;
-        const badge = CHECKMARKS[getPluginAbiBadgeScore(p, sanitizedAgentVersion)];
+        const score = (p.versions || p.Versions || []).reduce((s, v) => Math.max(s, abiScore(reqParts, v.targetAbi || v.TargetAbi)), 0);
+        const badge = CHECKMARKS[score];
         if (badge && (rest.name || rest.Name)) rest[rest.name ? 'name' : 'Name'] += ` [${badge}]`;
 
         if (rest.versions) {
@@ -121,7 +107,8 @@ async function getSources(file) {
     results.forEach((r, i) => {
         if (r.status === 'fulfilled') {
             (Array.isArray(r.value) ? r.value : (r.value?.plugins || [])).forEach(p => {
-                if ((p.guid || p.Guid) && pluginSupportsAnyAbi(p, activeAbiPrefixes)) {
+                const supported = (p.versions || p.Versions || []).some(v => abiScore(targetParts, v.targetAbi || v.TargetAbi) > 0);
+                if ((p.guid || p.Guid) && supported) {
                     p._metaSourceUrl = sources[i].m;
                     p._metaGithubUrl = sources[i].g;
                     plugins.push(p);
@@ -170,7 +157,7 @@ async function processImages(plugins) {
 async function main() {
     await fs.mkdir(pluginDir, { recursive: true });
     if (regenImages) await fs.readdir(pluginDir).then(files => Promise.all(files.map(f => fs.rm(path.join(pluginDir, f), { recursive: true, force: true }))));
-    
+
     const { plugins: fetched, sourceCount } = await getSources(path.join(__dirname, 'sources.txt'));
     if (!fetched.length) throw new Error('No plugins matched target ABI');
 
@@ -189,7 +176,7 @@ async function main() {
 
     await processImages(fetched);
     const transformed = transformPlugins(fetched, timestamp.substring(11, 16) + ' UTC');
-    
+
     const manifest = JSON.stringify(transformed, null, 2);
     const out = path.join(pluginsDir, `manifest.${agentLabel}.json`);
     const tmp = `${out}.${Date.now()}.tmp`;
