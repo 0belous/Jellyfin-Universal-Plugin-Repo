@@ -130,7 +130,7 @@ function transformPlugins(plugins, genTime) {
         }
 
         return { ...rest, guid };
-    });
+    }).sort((a, b) => (a.guid || '').localeCompare(b.guid || ''));
 }
 
 async function fetchSource(url) {
