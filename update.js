@@ -116,7 +116,7 @@ function transformPlugins(plugins, genTime) {
 
         const repoUrl = findGithubUrl(p);
         const sourceUrl = rest._metaSourceUrl || 'Unknown';
-        let appendText = `  \n  \nUniversal Repo:  \nGenerated: ${genTime}  \nSource: ${sourceUrl}`;
+        let appendText = `  \n  \nUniversal Repo \nSource: ${sourceUrl}`;
         delete rest._metaSourceUrl;
         delete rest._metaGithubUrl;
         if (repoUrl) appendText += `  \nGithub: ${repoUrl}`;
