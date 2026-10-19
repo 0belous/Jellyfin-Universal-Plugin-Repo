@@ -47,10 +47,9 @@ Pinning to a specific commit hash ensures that the manifest contents and checksu
 
 The catalogue uses checkmarks to indicate how many digits of your Jellyfin server's version (`X.Y.Z`) match the version declared by the plugin author:
 
-* **Triple checkmark (`✓✓✓`)**: The plugin author tested and verified the plugin against your exact Jellyfin version (`X.Y.Z`).
-* **Double checkmark (`✓✓`)**: The plugin supports your major and minor version (`X.Y`). Plugins with this rating typically work without issues.
-* **Single checkmark (`✓`)**: The plugin author declared support only for your major version (`X`).
-* **No checkmark**: The plugin does not declare support for your Jellyfin version. The plugin might still function, but review the upstream plugin documentation to confirm compatibility before installing it.
+* **Triple checkmark (`✓✓✓`)**: The plugin was compiled for your **exact** jellyfin version. **Will work as intended.**
+* **Double checkmark (`✓✓`)**: The plugin was compiled for your **major** jellyfin version. **Should work as intended.**
+* **Single checkmark (`✓`)**: The plugin was compiled for a **different major** version of jellyfin. **Install with caution.**
 
 ## How the catalogue works
 
