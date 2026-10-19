@@ -45,7 +45,7 @@ Pinning to a specific commit hash ensures that the manifest contents and checksu
 
 ## Jellyfin compatibility
 
-The catalogue uses checkmarks to indicate how many digits of your Jellyfin server's version (`X.Y.Z`) match the version declared by the plugin author:
+The catalogue uses checkmarks to indicate what level of compatibility the plugin and your server share:
 
 * **Triple checkmark (`✓✓✓`)**: The plugin was compiled for your **exact** jellyfin version. **Will work as intended.**
 * **Double checkmark (`✓✓`)**: The plugin was compiled for your **major** jellyfin version. **Should work as intended.**
