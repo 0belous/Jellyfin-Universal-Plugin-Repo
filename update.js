@@ -286,7 +286,18 @@ async function fetchSources(file, options = {}) {
     const logger = options.logger || console;
     const nonGithubOnly = options.nonGithubOnly || false;
     const lines = (await fs.readFile(file, 'utf8')).split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('#'));
-    const sources = lines.map(l => { const [m, g] = l.split('|').map(s => s.trim()); return { m, g }; });
+
+    const sources = lines.map(l => {
+        const parts = l.split('|').map(s => s.trim());
+        const skipCompatIndex = parts.findIndex(p => p.toLowerCase().replace(/[-_\s]/g, '') === 'skipcompat');
+        const skipCompat = skipCompatIndex !== -1;
+        if (skipCompat) {
+            parts.splice(skipCompatIndex, 1);
+        }
+        const m = parts[0] || '';
+        const g = parts[1] || '';
+        return { m, g, skipCompat };
+    }).filter(s => s.m);
 
     const uaVersions = Array.from(new Set(
         (options.agentVersions || [])
@@ -314,7 +325,6 @@ async function fetchSources(file, options = {}) {
         }
     }
 
-    // Interleave by version across non-GitHub sources to avoid bursting a single host
     for (const ver of uaVersions) {
         const ua = /^jellyfin(?:-server)?\//i.test(ver) ? ver : `Jellyfin-Server/${ver}`;
         for (const s of nonGithubSources) {
@@ -342,8 +352,15 @@ async function fetchSources(file, options = {}) {
             rawList.forEach(p => {
                 const guid = p.guid || p.Guid;
                 if (!guid) return;
+                const rawVersions = p.versions || p.Versions || [];
+                const versions = rawVersions.map(v => ({
+                    ...v,
+                    ...(source.skipCompat ? { _skipCompat: true } : {})
+                }));
                 rawPlugins.push({
                     ...p,
+                    versions,
+                    ...(source.skipCompat ? { _skipCompat: true } : {}),
                     _metaSourceUrl: source.m,
                     _metaGithubUrl: source.g
                 });
@@ -384,17 +401,22 @@ function deduplicateAndMergePlugins(plugins) {
             const existingVersions = existing.versions || [];
             const incomingVersions = p.versions || p.Versions || [];
 
-            // Merge versions, deduplicating identical version entries
+            if (p._skipCompat) {
+                existing._skipCompat = true;
+            }
+
             const seen = new Set(existingVersions.map(v => `${(v.version || '').trim()}|${(v.targetAbi || v.TargetAbi || '').trim()}|${(v.checksum || '').trim()}`));
             for (const v of incomingVersions) {
                 const key = `${(v.version || '').trim()}|${(v.targetAbi || v.TargetAbi || '').trim()}|${(v.checksum || '').trim()}`;
                 if (!seen.has(key)) {
                     seen.add(key);
                     existingVersions.push(v);
+                } else if (v._skipCompat) {
+                    const match = existingVersions.find(ev => `${(ev.version || '').trim()}|${(ev.targetAbi || ev.TargetAbi || '').trim()}|${(ev.checksum || '').trim()}` === key);
+                    if (match) match._skipCompat = true;
                 }
             }
 
-            // Fill in missing metadata fields if existing is missing them
             if (!existing.description && p.description) existing.description = p.description;
             if (!existing.overview && p.overview) existing.overview = p.overview;
             if (!existing.owner && p.owner) existing.owner = p.owner;
@@ -412,8 +434,13 @@ function filterVersionsForAgent(allVersions, targetMajorIdx) {
     const exact = [];
     const plusOne = [];
     const minusOne = [];
+    const skipCompat = [];
 
     allVersions.forEach(v => {
+        if (v._skipCompat) {
+            skipCompat.push(v);
+            return;
+        }
         const candMajor = getMajorIndex(v.targetAbi || v.TargetAbi);
         if (candMajor == null) return;
         const diff = candMajor - targetMajorIdx;
@@ -423,12 +450,17 @@ function filterVersionsForAgent(allVersions, targetMajorIdx) {
         else if (diff === -1) minusOne.push(v);
     });
 
+    let result = [];
     if (exact.length > 0 || plusOne.length > 0) {
-        return [...exact, ...plusOne];
+        result = [...exact, ...plusOne];
     } else if (minusOne.length > 0) {
-        return [...minusOne];
+        result = [...minusOne];
     }
-    return [];
+
+    if (skipCompat.length > 0) {
+        return [...result, ...skipCompat];
+    }
+    return result;
 }
 
 async function processSinglePass(url, filename, options = {}) {
@@ -476,13 +508,15 @@ function transformPlugins(plugins, agentVersion, genTime) {
     return plugins.map(p => {
         const guid = p.guid || p.Guid;
         const guidLower = String(guid || '').toLowerCase().trim();
-        const { Guid, ...rest } = p;
+        const { Guid, _skipCompat, ...rest } = p;
 
         if (rest.versions) {
-            rest.versions.forEach(v => {
-                if (v.dependencies) {
-                    v.dependencies = v.dependencies.filter(d => (d || '').toLowerCase() !== guidLower);
+            rest.versions = rest.versions.map(v => {
+                const { _skipCompat: vSkip, ...vRest } = v;
+                if (vRest.dependencies) {
+                    vRest.dependencies = vRest.dependencies.filter(d => (d || '').toLowerCase() !== guidLower);
                 }
+                return vRest;
             });
             rest.versions.sort((a, b) => {
                 const timeDiff = new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
@@ -528,10 +562,13 @@ function generateManifestForAgent(agentVersionStr, rawPlugins, sourceCount, opti
     const agentVersion = (agentVersionStr === 'universal' || !agentVersionStr) ? null : (versionMatch ? versionMatch[0] : null);
     const targetMajorIdx = agentVersion ? getMajorIndex(agentVersion) : null;
 
-    // Filter versions for each plugin
     const filteredPlugins = [];
     for (const p of rawPlugins) {
-        const matchingVersions = filterVersionsForAgent(p.versions || p.Versions || [], targetMajorIdx);
+        const allVers = p.versions || p.Versions || [];
+        const matchingVersions = p._skipCompat
+            ? allVers
+            : filterVersionsForAgent(allVers, targetMajorIdx);
+
         if (matchingVersions.length > 0) {
             filteredPlugins.push({
                 ...p,

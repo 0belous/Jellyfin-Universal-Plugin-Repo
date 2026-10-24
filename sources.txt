@@ -168,7 +168,7 @@ https://raw.githubusercontent.com/mihaif7/jellyfin-plugin-update-notifier/main/m
 https://raw.githubusercontent.com/mleem97/mleem-jellyfin/main/manifest.json | https://github.com/mleem97/mleem-jellyfin
 https://raw.githubusercontent.com/MoazSalem/litefin-plugin/release/manifest.json | https://github.com/MoazSalem/litefin-plugin
 https://raw.githubusercontent.com/monxas/jellyfin-share-plugin/main/manifest.json | https://github.com/monxas/jellyfin-share-plugin
-https://raw.githubusercontent.com/Moonfin-Client/Plugin/refs/heads/master/manifest.json | https://github.com/Moonfin-Client/Plugin
+https://raw.githubusercontent.com/Moonfin-Client/Plugin/refs/heads/master/manifest.json | https://github.com/Moonfin-Client/Plugin | skip-compat
 https://raw.githubusercontent.com/MorganKryze/jellyflare/main/manifest.json | https://github.com/MorganKryze/jellyflare
 https://raw.githubusercontent.com/mpash/jellyfin-anime-filler-skipper/main/manifest.json | http://github.com/mpash/jellyfin-anime-filler-skipper
 https://raw.githubusercontent.com/mugurc/jellyfin-plugin-pre-transcode/main/manifest.json | https://github.com/mugurc/jellyfin-plugin-pre-transcode
@@ -260,7 +260,7 @@ https://fra1.mirror.jellyfin.org/files/plugin/manifest.json | https://github.com
 https://repo.xkrivo.net/jellyfin/manifest.json | https://github.com/lyarenei/jellyfin-plugin-applemusic
 https://thelastfantasy.github.io/jellyfin-suite/manifest.json | https://github.com/thelastfantasy/jellyfin-suite
 https://titlovi.github.io/titlovi-jellyfin/repository.json | https://github.com/Titlovi/titlovi-jellyfin
-https://tuimdb.com/jellyfin/manifest.json | https://github.com/b-sullender/Jellyfin.Plugin.TUIMDB
+https://tuimdb.com/jellyfin/manifest.json | https://github.com/b-sullender/Jellyfin.Plugin.TUIMDB | skip-compat
 https://wetrakr.github.io/wetrakr-jf/manifest.json | https://github.com/wetrakr/wetrakr-jf 
 https://www.iamparadox.dev/jellyfin/plugins/manifest.json | https://github.com/IAmParadox27/jellyfin-plugin-repo
 https://xzonn.top/JellyfinPluginDouban/manifest.json | https://github.com/Xzonn/JellyfinPluginDouban
