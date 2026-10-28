@@ -52,6 +52,7 @@ https://raw.githubusercontent.com/Atinoda/jellyfin-plugin-tubearchivist-sponsorb
 https://raw.githubusercontent.com/aussierk/jellyfin-plugin-oidc/main/manifest.json | https://github.com/aussierk/jellyfin-plugin-oidc
 https://raw.githubusercontent.com/axolmain/jellyfin-otel-plugin/master/manifest.json | https://github.com/axolmain/jellyfin-otel-plugin
 https://raw.githubusercontent.com/Bardesss/customcoverart/main/manifest.json | https://github.com/bardesss/customcoverart
+https://raw.githubusercontent.com/BBBannon/Shoalcade/main/manifest.json | https://github.com/BBBannon/Shoalcade
 https://raw.githubusercontent.com/BlackDark/jellyfin-plugin-empty-folder-cleaner/refs/heads/manifests/manifest.json | https://github.com/BlackDark/jellyfin-plugin-empty-folder-cleaner
 https://raw.githubusercontent.com/blcksnake/jellyfin-admin-announcements-plugin/main/repository/manifest.json | https://github.com/blcksnake/jellyfin-admin-announcements-plugin
 https://raw.githubusercontent.com/BORNIOS/Jellyfin-Database-Providers-Postgres/main/manifest.json | https://github.com/BORNIOS/Jellyfin-Database-Providers-Postgres
