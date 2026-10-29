@@ -152,6 +152,7 @@ https://raw.githubusercontent.com/kingschnulli/jellyfin-youtube-plugin/main/mani
 https://raw.githubusercontent.com/Kuschel-code/JellyfinUpscalerPlugin/refs/heads/main/manifest.json | https://github.com/Kuschel-code/JellyfinUpscalerPlugin
 https://raw.githubusercontent.com/lachlandcp/jellyfin-editors-choice-plugin/HEAD/manifest.json | https://github.com/lachlandcp/jellyfin-editors-choice-plugin
 https://raw.githubusercontent.com/Langeboi/JellyfinPlugins/main/manifest.json | https://github.com/Langeboi/JellyfinPlugins
+https://raw.githubusercontent.com/lanjak/jellyfin-plugin-rewatch-nextup/main/manifest.json | https://github.com/lanjak/jellyfin-plugin-rewatch-nextup
 https://raw.githubusercontent.com/lennykean/jellyfin-powertoys/main/manifest.json | https://github.com/lennykean/jellyfin-powertoys
 https://raw.githubusercontent.com/leonardoman9/jellyfin-plugin-cover-art-sync/HEAD/manifest.json | https://github.com/leonardoman9/jellyfin-plugin-cover-art-sync
 https://raw.githubusercontent.com/linaspurinis/jellyfin-plugin-mdblist/gh-pages/manifest.json | https://github.com/MDBList/jellyfin-plugin-mdblist
