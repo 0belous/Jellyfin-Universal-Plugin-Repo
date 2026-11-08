@@ -48,6 +48,7 @@ https://raw.githubusercontent.com/Atinoda/jellyfin-plugin-tubearchivist-sponsorb
 https://raw.githubusercontent.com/aussierk/jellyfin-plugin-oidc/main/manifest.json | https://github.com/aussierk/jellyfin-plugin-oidc
 https://raw.githubusercontent.com/axolmain/jellyfin-otel-plugin/master/manifest.json | https://github.com/axolmain/jellyfin-otel-plugin
 https://raw.githubusercontent.com/Bardesss/customcoverart/main/manifest.json | https://github.com/bardesss/customcoverart
+https://raw.githubusercontent.com/BBBannon/Shoalcade/main/manifest.json | https://github.com/BBBannon/Shoalcade
 https://raw.githubusercontent.com/BlackDark/jellyfin-plugin-empty-folder-cleaner/refs/heads/manifests/manifest.json | https://github.com/BlackDark/jellyfin-plugin-empty-folder-cleaner
 https://raw.githubusercontent.com/blcksnake/jellyfin-admin-announcements-plugin/main/repository/manifest.json | https://github.com/blcksnake/jellyfin-admin-announcements-plugin
 https://raw.githubusercontent.com/BORNIOS/Jellyfin-Database-Providers-Postgres/main/manifest.json | https://github.com/BORNIOS/Jellyfin-Database-Providers-Postgres
@@ -145,6 +146,7 @@ https://raw.githubusercontent.com/kingschnulli/jellyfin-youtube-plugin/main/mani
 https://raw.githubusercontent.com/Kuschel-code/JellyfinUpscalerPlugin/refs/heads/main/manifest.json | https://github.com/Kuschel-code/JellyfinUpscalerPlugin
 https://raw.githubusercontent.com/lachlandcp/jellyfin-editors-choice-plugin/HEAD/manifest.json | https://github.com/lachlandcp/jellyfin-editors-choice-plugin
 https://raw.githubusercontent.com/Langeboi/JellyfinPlugins/main/manifest.json | https://github.com/Langeboi/JellyfinPlugins
+https://raw.githubusercontent.com/lanjak/jellyfin-plugin-rewatch-nextup/main/manifest.json | https://github.com/lanjak/jellyfin-plugin-rewatch-nextup
 https://raw.githubusercontent.com/lennykean/jellyfin-powertoys/main/manifest.json | https://github.com/lennykean/jellyfin-powertoys
 https://raw.githubusercontent.com/leonardoman9/jellyfin-plugin-cover-art-sync/HEAD/manifest.json | https://github.com/leonardoman9/jellyfin-plugin-cover-art-sync
 https://raw.githubusercontent.com/linaspurinis/jellyfin-plugin-mdblist/gh-pages/manifest.json | https://github.com/MDBList/jellyfin-plugin-mdblist
