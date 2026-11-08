@@ -15,18 +15,15 @@ https://firestaerter3.github.io/jellyfin-plugin-repo/manifest.json | https://git
 https://geiserx.github.io/quality-gate/manifest.json | https://github.com/GeiserX/quality-gate
 https://geiserx.github.io/smart-covers/manifest.json | https://github.com/GeiserX/smart-covers
 https://geiserx.github.io/whisper-subs/manifest.json | https://github.com/GeiserX/whisper-subs
-https://git.nexific.net/virtualmarc-oss/jellyfin-jfignore-plugin/raw/branch/master/manifest.json | https://git.nexific.net/virtualmarc-oss/jellyfin-jfignore-plugin
 https://github.com/bpwhelan/Jimakufin/releases/latest/download/manifest.json | https://github.com/bpwhelan/Jimakufin
 https://github.com/cxfksword/jellyfin-plugin-danmu/releases/download/manifest/manifest.json | https://github.com/cxfksword/jellyfin-plugin-danmu/
 https://github.com/cxfksword/jellyfin-plugin-metashark/releases/download/manifest/manifest.json | https://github.com/cxfksword/jellyfin-plugin-metashark
 https://github.com/cxfksword/jellyfin-plugin-tmdbplus/releases/download/manifest/manifest.json | https://github.com/cxfksword/jellyfin-plugin-tmdbplus
 https://github.com/iEnki/jellyfin-plugin-livetv-control-center/releases/latest/download/manifest.json | https://github.com/iEnki/jellyfin-plugin-livetv-control-center
 https://gladtbam.github.io/jellyfin-plugin-ass-subsetter/manifest.json | https://github.com/Gladtbam/jellyfin-plugin-ass-subsetter
-https://hummird.online/jellyfin/manifest.json | https://github.com/Hummird/Artisan-Jelly
 https://intro-skipper.org/manifest.json | https://github.com/intro-skipper/intro-skipper
 https://jellyfin.vuegen.dev/plugins/manifest.json | https://github.com/tim-vu/jellyfin-plugin-continue-watching
 https://jellyfish-client.github.io/plugin/manifest.json | https://github.com/Jellyfish-Client/plugin
-https://jellymix.org/manifest.json | https://github.com/steveshannon/jellyfin-plugin-jellymix
 https://kookxiang.github.io/jellyfin-plugin-bangumi/repository.json | https://github.com/kookxiang/jellyfin-plugin-bangumi
 https://lmaonator.github.io/jellyfin-plugin-runscripts/manifest.json | https://github.com/lmaonator/jellyfin-plugin-runscripts
 https://luckynos7evin.github.io/jellyfin-plugins/manifest.json | https://github.com/LuckyNoS7evin/jellyfin-plugins
@@ -44,7 +41,6 @@ https://raw.githubusercontent.com/AECX/FinTube/master/manifest.json | https://gi
 https://raw.githubusercontent.com/ankenyr/jellyfin-plugin-repo/master/manifest.json | https://github.com/ankenyr/jellyfin-youtube-metadata-plugin
 https://raw.githubusercontent.com/aober420/AD-Account-Sync/main/manifest.json | https://github.com/aober420/AD-Account-Sync
 https://raw.githubusercontent.com/aober420/Jellyfin-AutoCert/main/repository/manifest.json | https://github.com/aober420/Jellyfin-AutoCert
-https://raw.githubusercontent.com/apteryxxyz/jellyfin-plugin-air-times/HEAD/manifest.json | https://github.com/apteryxxyz/jellyfin-plugin-air-times
 https://raw.githubusercontent.com/arition/jellyfin-plugin-ignore/master/manifest.json | https://github.com/arition/jellyfin-plugin-ignore
 https://raw.githubusercontent.com/arnesacnussem/jellyfin-plugin-meilisearch/refs/heads/master/manifest.json | https://github.com/arnesacnussem/jellyfin-plugin-meilisearch
 https://raw.githubusercontent.com/AshleyDeo/jellyfin-plugin-calibre/main/manifest.json | https://github.com/AshleyDeo/jellyfin-plugin-calibre
@@ -96,7 +92,6 @@ https://raw.githubusercontent.com/Franciskid/jellyfin-plugin-sharelinks/main/man
 https://raw.githubusercontent.com/fscorrupt/posterizarr/main/manifest.json | https://github.com/fscorrupt/posterizarr
 https://raw.githubusercontent.com/G-grbz/Jellyfin-MonWUI-Plugin/main/manifest.json | https://github.com/G-grbz/Jellyfin-MonWUI-Plugin
 https://raw.githubusercontent.com/GrandguyJS/media-upload-plugin/main/manifest.json | https://github.com/GrandguyJS/media-upload-plugin
-https://raw.githubusercontent.com/hackeriori/jellyfin-plugin-deovr/main/manifest.json | https://github.com/hackeriori/jellyfin-plugin-deovr
 https://raw.githubusercontent.com/HarshLabs/jellyfin-plugin-native-trickplay/main/manifest.json | https://github.com/HarshLabs/jellyfin-plugin-native-trickplay
 https://raw.githubusercontent.com/hexxone/TeleJelly/dist/manifest.json | https://github.com/hexxone/TeleJelly
 https://raw.githubusercontent.com/hypercrites/jellyfin-ambient-light-plugin/main/manifest.json | https://github.com/hypercrites/jellyfin-ambient-light-plugin
@@ -107,7 +102,6 @@ https://raw.githubusercontent.com/IDisposable/jellyfin-plugin-mindthegaps/main/m
 https://raw.githubusercontent.com/IDisposable/jellyfin-plugin-subtitleocr/main/manifest.json | https://github.com/IDisposable/jellyfin-plugin-subtitleocr
 https://raw.githubusercontent.com/ifoundthetao/jellyfin-plugin-season-picker/main/manifest.json | https://github.com/ifoundthetao/jellyfin-plugin-season-picker
 https://raw.githubusercontent.com/iHumberto/jellyfin-plugin-scriptrunner/main/manifest.json | https://github.com/iHumberto/jellyfin-plugin-scriptrunner
-https://raw.githubusercontent.com/ImLunaHey/jellyfin-plugin-brrr-now/main/manifest.json | https://github.com/ImLunaHey/jellyfin-plugin-brrr-now
 https://raw.githubusercontent.com/ivenos/jellyfin_inventory/main/manifest.json | https://github.com/ivenos/jellyfin_inventory
 https://raw.githubusercontent.com/jackwander/jellyfin-graveyard-analytics/master/manifest.json | https://github.com/jackwander/jellyfin-graveyard-analytics
 https://raw.githubusercontent.com/JellyboxAD/Jellyfin.Plugin.StreamLimit/main/manifest.json | https://github.com/JellyboxAD/Jellyfin.Plugin.StreamLimit
@@ -141,7 +135,6 @@ https://raw.githubusercontent.com/JPKribs/jellyfin-plugin-youtubeaudio/master/ma
 https://raw.githubusercontent.com/JPVenson/Jellyfin.BetterDefaultProfilePictures.Plugin/refs/heads/master/manifest.json | https://github.com/JPVenson/Jellyfin.BetterDefaultProfilePictures.Plugin
 https://raw.githubusercontent.com/jyourstone/jellyfin-plugin-manifest/main/manifest.json | https://github.com/jyourstone/jellyfin-plugin-manifest
 https://raw.githubusercontent.com/jyourstone/jellyfin-plugin-manifest/master/manifest.json | https://github.com/jyourstone/jellyfin-musictags-plugin
-https://raw.githubusercontent.com/k-matti/jellyfin-plugin-repository/master/manifest.json | https://github.com/k-matti/jellyfin-plugin-repository
 https://raw.githubusercontent.com/K3ntas/jellyfin-plugin-ratings/main/manifest.json | https://github.com/K3ntas/jellyfin-plugin-ratings
 https://raw.githubusercontent.com/kamilkosek/jellyfin-plugin-provider-stuff/main/manifest.json | https://github.com/kamilkosek/jellyfin-plugin-provider-stuff
 https://raw.githubusercontent.com/kamoba/jellyfin-plugin-thedwarfshammer/main/manifest.json | https://github.com/Kamoba/jellyfin-plugin-thedwarfshammer
@@ -195,14 +188,12 @@ https://raw.githubusercontent.com/peterdu1109/NotifySync/refs/heads/main/reposit
 https://raw.githubusercontent.com/ph15ch/Jellyfin-Transcode-Downloader/main/repo/manifest.json | https://github.com/ph15ch/Jellyfin-Transcode-Downloader
 https://raw.githubusercontent.com/pmssoftware/jellyfin-plugin-chat/main/manifest.json | https://github.com/pmssoftware/jellyfin-plugin-chat
 https://raw.githubusercontent.com/praetorianer777/chaosflix-jellyfin/main/manifest.json | https://github.com/praetorianer777/chaosflix-jellyfin
-https://raw.githubusercontent.com/PunchPlay/jellyfin-plugin-punchplay/refs/heads/main/manifest.json | https://github.com/PunchPlay/jellyfin-plugin-punchplay
 https://raw.githubusercontent.com/queukat/YummyKodik/gh-pages/manifest.json | https://github.com/queukat/YummyKodik
 https://raw.githubusercontent.com/raleighawes0me/JellyToneDown/main/manifest.json | https://github.com/raleighawes0me/JellyToneDown
 https://raw.githubusercontent.com/rappa850/Jellyfin.Plugin.Amane/main/manifest.json | https://github.com/rappa850/Jellyfin.Plugin.Amane
 https://raw.githubusercontent.com/rdpharr/jellyfin-plugin-localrecs/main/manifest.json | https://github.com/rdpharr/jellyfin-plugin-localrecs
 https://raw.githubusercontent.com/retrorat1/Jellyfin.Plugin.TheSportsDB/main/manifest.json | https://github.com/retrorat1/Jellyfin.Plugin.TheSportsDB
 https://raw.githubusercontent.com/rimseg/jellyfin-filter-search/main/manifest.json | https://github.com/rimseg/jellyfin-filter-search
-https://raw.githubusercontent.com/RM4Y/JellyTuber/main/manifest.json | https://github.com/RM4Y/JellyTuber
 https://raw.githubusercontent.com/RomainPierre7/jellyfin-plugin-TelegramNotifier/main/manifest.json | https://github.com/RomainPierre7/jellyfin-plugin-TelegramNotifier
 https://raw.githubusercontent.com/rs-jensen/lapse-jellyfin-plugin/main/manifest.json | https://github.com/Schwponaco-org/lapse-jellyfin-plugin
 https://raw.githubusercontent.com/ryandash/jellyfin-plugin-myanimelist/main/manifest.json | https://github.com/ryandash/jellyfin-plugin-myanimelist
