@@ -203,6 +203,7 @@ https://raw.githubusercontent.com/Sanidhya30/Jellyfin-Newsletter/HEAD/manifest.j
 https://raw.githubusercontent.com/Saturn745/jellyfin-favorited-songs-playlist/refs/heads/master/manifest.json | https://github.com/Saturn745/jellyfin-favorited-songs-playlist
 https://raw.githubusercontent.com/SenorSmartyPants/jellyfin-plugin-refreshsparse/master/manifest.json | https://github.com/SenorSmartyPants/jellyfin-plugin-refreshsparse
 https://raw.githubusercontent.com/Shadowghost/jellyfin-plugin-segment-recognition/metadata/stable/manifest.json | https://github.com/Shadowghost/jellyfin-plugin-segment-recognition
+https://raw.githubusercontent.com/shahadat-hossion/media-source-bridge/main/manifest.json | https://github.com/shahadat-hossion/media-source-bridge
 https://raw.githubusercontent.com/shemanaev/jellyfin-plugin-repo/master/manifest.json | https://github.com/shemanaev/jellyfin-plugin-repo
 https://raw.githubusercontent.com/ShokoAnime/Shokofin/metadata/stable/manifest.json | https://github.com/ShokoAnime/Shokofin
 https://raw.githubusercontent.com/SiroxCW/Jellyfin-AniWorld-Downloader/main/manifest.json | https://github.com/SiroxCW/Jellyfin-AniWorld-Downloader
