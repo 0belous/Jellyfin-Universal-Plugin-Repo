@@ -43,14 +43,6 @@ https://raw.githubusercontent.com/0belous/upr-static/<COMMIT_HASH>/<MANIFEST_FIL
 
 Pinning to a specific commit hash ensures that the manifest contents and checksum remain immutable until you decide to update it.
 
-## Jellyfin compatibility
-
-The catalogue uses checkmarks to indicate what level of compatibility the plugin and your server share:
-
-* **Triple checkmark (`✓✓✓`)**: The plugin was compiled for your **exact** jellyfin version. **Will work as intended.**
-* **Double checkmark (`✓✓`)**: The plugin was compiled for your **major** jellyfin version. **Should work as intended.**
-* **Single checkmark (`✓`)**: The plugin was compiled for a **different major** version of jellyfin. **Install with caution.**
-
 ## How the catalogue works
 
 The service performs these steps:
