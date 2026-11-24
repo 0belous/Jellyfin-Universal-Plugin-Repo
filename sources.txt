@@ -69,6 +69,7 @@ https://raw.githubusercontent.com/cleverdevil/plexyfin/main/metadata/stable/mani
 https://raw.githubusercontent.com/cocomeros/Jellyfin.Plugin.ActorsIndex/main/manifest.json | https://github.com/cocomeros/Jellyfin.Plugin.ActorsIndex
 https://raw.githubusercontent.com/CodeDevMLH/jellyfin-plugin-manifest/refs/heads/main/manifest.json | https://github.com/CodeDevMLH/jellyfin-plugin-manifest
 https://raw.githubusercontent.com/crackruckles/MediaDash/main/manifest.json | https://github.com/crackruckles/MediaDash
+https://raw.githubusercontent.com/crocodile13/jellyfin-plugin-recoplus/main/manifest.json | https://github.com/crocodile13/jellyfin-plugin-recoplus
 https://raw.githubusercontent.com/Cyprien-png/jellyfin-binge-buddy/HEAD/manifest.json | https://github.com/Cyprien-png/jellyfin-binge-buddy
 https://raw.githubusercontent.com/danieladov/JellyfinPluginManifest/master/manifest.json | https://github.com/danieladov/JellyfinPluginManifest
 https://raw.githubusercontent.com/danielfariati/jellyfin-plugin-lastfm/refs/heads/master/manifest.json | https://github.com/danielfariati/jellyfin-plugin-lastfm
